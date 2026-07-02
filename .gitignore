@@ -1,0 +1,6 @@
+# WSL alternate-data-stream marker files
+*:Zone.Identifier
+
+# archives / OS junk
+*.zip
+.DS_Store

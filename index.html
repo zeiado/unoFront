@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&amp;family=Cairo:wght@300;400;500;600;700;800&amp;family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  .uno { direction: rtl; font-family: 'Cairo', sans-serif; color: #2A2320; background: #FBF3E9; }
+  .uno[data-lang="en"] { direction: ltr; font-family: 'Inter', sans-serif; }
+  /* language visibility */
+  .en { display: none; }
+  .uno[data-lang="en"] .en { display: inline; }
+  .uno[data-lang="en"] .ar { display: none; }
+  /* display serif */
+  .disp { font-family: 'Amiri', serif; font-weight: 700; }
+  .uno[data-lang="en"] .disp { font-family: 'Playfair Display', serif; }
+  .uno[data-lang="en"] .disp { letter-spacing: -0.015em; }
+  .hero-h { line-height: 1.34; }
+  /* hero overlay follows the text side: right in RTL, left in EN */
+  .hero-ov { background: linear-gradient(270deg, rgba(43,13,18,.88) 0%, rgba(43,13,18,.42) 46%, rgba(43,13,18,0) 72%); }
+  .uno[data-lang="en"] .hero-ov { background: linear-gradient(90deg, rgba(43,13,18,.88) 0%, rgba(43,13,18,.42) 46%, rgba(43,13,18,0) 72%); }
+  .uno[data-lang="en"] .hero-h { line-height: 1.1; letter-spacing: -0.02em; }
+  /* warm gold primary button */
+  .btn-gold { background: #AD8032; color: #FFF9EE; box-shadow: 0 10px 26px rgba(120,80,20,.28); transition: filter .3s ease, box-shadow .3s ease, transform .3s ease; }
+  .btn-gold:hover { filter: brightness(.93); box-shadow: 0 15px 34px rgba(184,134,11,.40); transform: translateY(-1px); }
+  .btn-gold:active { transform: translateY(0) scale(.98); filter: brightness(.87); }
+  .btn-outline { background: transparent; border: 1.5px solid #8B4513; color: #8B4513; transition: background .3s ease, color .3s ease; }
+  .btn-outline:hover { background: #8B4513; color: #FBF3E9; }
+  .btn-outline:active { transform: scale(.98); }
+  /* directional icon flip: default (ar/rtl) mirrors */
+  .flip { transform: scaleX(-1); }
+  .uno[data-lang="en"] .flip { transform: scaleX(1); }
+  /* product card hover: lift + warm shadow */
+  .card { transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+  .card .card-img { box-shadow: 0 6px 18px rgba(139,69,19,.10); transition: box-shadow .45s ease; }
+  .card:hover { transform: translateY(-7px); }
+  .card:hover .card-img { box-shadow: 0 24px 44px rgba(139,69,19,.22); }
+  .card .card-img img { transition: transform .9s cubic-bezier(.2,.7,.2,1); }
+  .card:hover .card-img img { transform: scale(1.07); }
+  .card .card-wa { opacity: 0; transform: translateY(8px); transition: opacity .35s ease, transform .35s ease; }
+  .card:hover .card-wa { opacity: 1; transform: translateY(0); }
+  .card .pname { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 44px; }
+  .catcard img { transition: transform .8s cubic-bezier(.2,.7,.2,1); }
+  .catcard:hover img { transform: scale(1.08); }
+  .navlink { position: relative; }
+  .navlink::after { content:''; position:absolute; inset-inline-start:0; bottom:-4px; height:1.5px; width:0; background:#C1912F; transition:width .3s ease; }
+  .navlink:hover::after { width:100%; }
+  .sqfeed:hover .sqfeed-ov { opacity: 1; }
+  /* layout shell */
+  .shell { display: grid; grid-template-columns: 264px 1fr; gap: 40px; }
+  .mobile-filter-btn { display: none; }
+  .drawer-scrim { display: none; }
+  .prodgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 36px 28px; }
+  .catstrip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .feedgrid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  @media (max-width: 1180px) {
+    .prodgrid { grid-template-columns: repeat(3, 1fr); }
+    .feedgrid { grid-template-columns: repeat(6, 1fr); }
+  }
+  @media (max-width: 920px) {
+    .shell { grid-template-columns: 1fr; gap: 0; }
+    .mobile-filter-btn { display: flex !important; }
+    .prodgrid { grid-template-columns: repeat(2, 1fr); gap: 20px 14px; }
+    .catstrip { grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .feedgrid { grid-template-columns: repeat(3, 1fr); }
+    .hero-wrap { height: 78vh !important; }
+    .storygrid { grid-template-columns: 1fr !important; }
+    .navrow { display: none !important; }
+    .footgrid { grid-template-columns: 1fr 1fr !important; gap: 34px 20px !important; }
+    .pdpgrid, .logingrid { grid-template-columns: 1fr !important; gap: 30px !important; }
+    .logingrid > div:first-child { min-height: 220px !important; }
+    .relgrid { grid-template-columns: repeat(2, 1fr) !important; gap: 18px !important; }
+    /* single sidebar becomes bottom-sheet drawer */
+    .filterbox { position: fixed !important; inset-inline: 0 !important; bottom: 0; top: auto !important;
+      z-index: 120; transform: translateY(101%); transition: transform .42s cubic-bezier(.2,.7,.2,1); pointer-events: none; }
+    .uno[data-filter-open="1"] .filterbox { transform: translateY(0); pointer-events: auto; }
+    .filterbox > div { border-radius: 22px 22px 0 0 !important; box-shadow: 0 -18px 50px rgba(0,0,0,.22);
+      max-height: 84vh; overflow-y: auto; padding-bottom: 26px !important; }
+    .uno[data-filter-open="1"] .drawer-scrim { display: block; position: fixed; inset: 0; background: rgba(20,16,12,.42); z-index: 110; }
+    .drawer-handle { display: flex !important; }
+    .drawer-apply { display: block !important; }
+  }
+  @media (max-width: 560px) {
+    .catstrip { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    .feedgrid { grid-template-columns: repeat(3, 1fr); }
+  }
+  input[type=range].goldrange { -webkit-appearance: none; appearance: none; height: 3px; border-radius: 3px;
+    background: linear-gradient(to right, #C1912F, #C1912F); background-size: var(--fill,60%) 100%; background-repeat: no-repeat; background-color: #E4DACB; }
+  .uno[data-lang="en"] input[type=range].goldrange { background: linear-gradient(to left, #C1912F, #C1912F) #E4DACB; background-size: var(--fill,60%) 100%; background-repeat: no-repeat; }
+  input[type=range].goldrange::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 17px; height: 17px; border-radius: 50%; background: #FBF3E9; border: 4px solid #C1912F; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,.2); }
+  input[type=range].goldrange::-moz-range-thumb { width: 15px; height: 15px; border-radius: 50%; background: #FBF3E9; border: 4px solid #C1912F; cursor: pointer; }
+  .drawer-handle { display: none; }
+  .drawer-apply { display: none; }
+
+  /* icon button hover/active feedback */
+  .icon-btn-light { transition: background .25s ease, border-color .25s ease, transform .15s ease; }
+  .icon-btn-light:hover { background: rgba(255,255,255,.08); }
+  .icon-btn-light:active { transform: scale(.92); }
+  .icon-btn-dark { transition: background .25s ease, border-color .25s ease, transform .15s ease; }
+  .icon-btn-dark:hover { background: rgba(42,35,32,.06); }
+  .icon-btn-dark:active { transform: scale(.94); }
+  .uno button:focus-visible, .uno a:focus-visible, .uno input:focus-visible { outline: 2px solid #C1912F; outline-offset: 2px; border-radius: 6px; }
+
+  /* filter chip / row / radio active + hover states */
+  [data-chip="1"] { transition: background .2s ease, color .2s ease, border-color .2s ease, transform .15s ease; }
+  [data-chip="1"]:hover { border-color: #C1912F; }
+  [data-chip="1"]:active { transform: scale(.96); }
+  [data-chip="1"][data-active="true"] { background: #AD8032; border-color: transparent; color: #2A2320; font-weight: 700; box-shadow: 0 6px 16px rgba(184,134,11,.25); }
+  [data-row="1"] { transition: background .2s ease, color .2s ease; }
+  [data-row="1"]:hover { background: #F7F0E2; }
+  [data-row="1"][data-active="true"] { background: #FBF3E9; color: #2A2320; font-weight: 700; }
+  [data-dot="1"] { opacity: 0; transform: scale(.4); transition: opacity .2s ease, transform .2s ease; }
+  [data-dot="1"][data-active="true"] { opacity: 1; transform: scale(1); }
+  [data-radio="1"] { transition: box-shadow .2s ease; }
+  [data-radio="1"][data-active="true"] { box-shadow: 0 0 0 3px rgba(193,145,47,.15); }
+
+  /* disabled / out-of-stock product card */
+  .card[data-disabled="true"] { cursor: not-allowed; }
+  .card[data-disabled="true"] .card-img img { filter: grayscale(.4) brightness(.78); }
+  .card[data-disabled="true"]:hover { transform: none; }
+  .card[data-disabled="true"]:hover .card-img { box-shadow: 0 6px 18px rgba(139,69,19,.10); }
+
+  /* skeleton loading state */
+  @keyframes shimmer { 0% { background-position: -300px 0; } 100% { background-position: 300px 0; } }
+  .skel { background: linear-gradient(90deg, #ECE2D0 0%, #F7F0E2 50%, #ECE2D0 100%); background-size: 600px 100%; animation: shimmer 1.3s ease-in-out infinite; }
+
+  /* PDP gallery thumbnails */
+  .thumb { border: 2px solid transparent; opacity: .68; transition: border-color .2s ease, opacity .2s ease; }
+  .thumb:hover { opacity: .9; }
+  .thumb[data-active="true"] { border-color: #C1912F; opacity: 1; }
+
+  /* accordion */
+  .acc-row:hover { background: #FBF3E9; }
+
+  /* footer link/icon hovers */
+  .footlink { transition: color .2s ease; }
+  .footlink:hover { color: #D4A657; }
+  .footsoc { transition: background .2s ease, border-color .2s ease, color .2s ease; }
+  .footsoc:hover { background: rgba(212,166,87,.14); border-color: #D4A657; color: #F5EAD6; }
+
+  /* section rhythm */
+  .catalog-shell { background: #F5EDDC; border-top: 1px solid #ECDFC7; }
+  .feed-shell { background: #FFFCF5; border-top: 1px solid #ECE1CE; }
+  /* instagram sliding gallery (auto-scrolling marquee) */
+  .igmarquee { position: relative; overflow: hidden; direction: ltr;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+  .igmarquee-track { display: flex; gap: 18px; width: max-content; direction: ltr; padding: 6px 9px;
+    animation: igscroll 60s linear infinite; }
+  .igmarquee:hover .igmarquee-track { animation-play-state: paused; }
+  .igcard { position: relative; flex: 0 0 auto; width: 278px; aspect-ratio: 4/5; border-radius: 12px;
+    overflow: hidden; cursor: pointer; background: #EFE7DA; box-shadow: 0 8px 22px rgba(139,69,19,.14);
+    transition: transform .45s cubic-bezier(.2,.7,.2,1), box-shadow .45s ease; }
+  .igcard img { width: 100%; height: 100%; object-fit: cover; transition: transform .9s cubic-bezier(.2,.7,.2,1); }
+  .igcard:hover { transform: translateY(-6px); box-shadow: 0 26px 46px rgba(139,69,19,.26); }
+  .igcard:hover img { transform: scale(1.06); }
+  .igcard-ig { position: absolute; top: 12px; inset-inline-end: 12px; color: #fff; opacity: .92;
+    filter: drop-shadow(0 1px 3px rgba(0,0,0,.5)); line-height: 0; }
+  .igcard-ov { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 16px; text-align: start; opacity: 0; transition: opacity .35s ease;
+    background: linear-gradient(0deg, rgba(31,20,14,.85) 0%, rgba(31,20,14,.18) 48%, rgba(31,20,14,0) 72%); }
+  .igcard:hover .igcard-ov { opacity: 1; }
+  @keyframes igscroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (max-width: 560px) { .igcard { width: 214px; } }
+
+  /* grids: PDP / login / related */
+  .pdpgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
+  .logingrid { display: grid; grid-template-columns: 1fr 1fr; }
+  .relgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+</style>
+</helmet>
+<div class="uno" data-lang="{{ lang }}" data-filter-open="{{ filterOpenAttr }}">
+
+<sc-if value="{{ isLogin }}" hint-placeholder-val="{{ false }}">
+  <div data-screen-label="Login" style="min-height:100vh; display:flex; flex-direction:column; background:#FBF3E9;">
+    <div style="padding:22px 26px; display:flex; align-items:center; justify-content:space-between;">
+      <button onClick="{{ backToShop }}" class="icon-btn-dark" style="display:inline-flex; align-items:center; gap:8px; background:none; border:none; cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; color:#4a4238; padding:8px 12px; border-radius:999px;">
+        <svg class="flip" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+        <span class="ar">العودة للمتجر</span><span class="en">Back to Store</span>
+      </button>
+      <button onClick="{{ toggleLang }}" style="background:none;border:1px solid #D8CBB6;border-radius:999px;cursor:pointer;padding:6px 14px;font-family:inherit;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#4a4238;display:inline-flex;align-items:center;gap:8px;">
+        <span style="{{ arActiveStyle }}">ع</span><span style="opacity:.4;">/</span><span style="{{ enActiveStyle }}">EN</span>
+      </button>
+    </div>
+    <div class="logingrid" style="flex:1; max-width:1140px; margin:0 auto 48px; width:100%; box-shadow:0 30px 70px rgba(42,35,32,.14); border-radius:20px; overflow:hidden;">
+      <div style="position:relative; min-height:540px; background:#3A1118; overflow:hidden;">
+        <img src="images/cuff.jpg" alt="Uno jewellery" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 25%;">
+        <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(43,13,18,.5) 0%, rgba(43,13,18,.88) 100%);"></div>
+        <div style="position:relative; height:100%; display:flex; flex-direction:column; justify-content:space-between; padding:48px;">
+          <div>
+            <img src="images/uno-logo-gold.png" alt="Uno Jewellery" style="height:88px; width:auto; display:block;">
+          </div>
+          <div>
+            <div style="width:26px; height:1px; background:#C1912F; margin-bottom:18px;"></div>
+            <div style="color:#E9CE7A; font-size:11.5px; font-weight:600; letter-spacing:.22em; margin-bottom:16px;"><span class="ar">جودةٌ تدوم، صناعةٌ مصرية</span><span class="en">EGYPTIAN CRAFT, TIMELESS QUALITY</span></div>
+            <h2 class="disp hero-h" style="margin:0 0 16px; font-size:clamp(26px,3.2vw,36px); font-weight:700; color:#FBF3E9;"><span class="ar">صِيغَت لتبقى معكِ</span><span class="en">Made to Stay With You</span></h2>
+            <p style="font-size:14.5px; line-height:1.8; color:#D9C4BC; margin:0; max-width:340px; font-weight:300;"><span class="ar">احفظي قطعكِ المفضّلة، وتابعي طلباتكِ، واستمتعي بعروضٍ حصرية لعميلات اونو.</span><span class="en">Save your favorite pieces, track your orders, and enjoy offers exclusive to Uno members.</span></p>
+          </div>
+        </div>
+      </div>
+      <div style="background:#fff; padding:56px 52px; display:flex; flex-direction:column; justify-content:center;">
+        <h1 class="disp" style="margin:0 0 8px; font-size:29px; font-weight:700; color:#2A2320;"><span class="ar">أهلاً بعودتك</span><span class="en">Welcome Back</span></h1>
+        <p style="margin:0 0 30px; color:#8a8072; font-size:14px;"><span class="ar">سجّلي الدخول لمتابعة طلباتكِ ومفضّلاتكِ</span><span class="en">Sign in to track your orders and favorites</span></p>
+        <form onSubmit="{{ loginSubmit }}" style="display:flex; flex-direction:column; gap:20px;">
+          <div>
+            <label style="display:block; font-size:12.5px; font-weight:700; color:#4a4238; margin-bottom:8px;"><span class="ar">البريد الإلكتروني</span><span class="en">Email Address</span></label>
+            <div style="display:flex; align-items:center; gap:10px; border:1px solid #D8CBB6; border-radius:12px; padding:13px 16px; background:#FBF9F5;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a99a7d" stroke-width="1.7"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+              <input type="email" placeholder="{{ emailPh }}" style="border:none; outline:none; background:none; flex:1; font-family:inherit; font-size:14px; color:#2A2320;">
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-size:12.5px; font-weight:700; color:#4a4238; margin-bottom:8px;"><span class="ar">كلمة المرور</span><span class="en">Password</span></label>
+            <div style="display:flex; align-items:center; gap:10px; border:1px solid #D8CBB6; border-radius:12px; padding:13px 16px; background:#FBF9F5;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a99a7d" stroke-width="1.7"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>
+              <input type="{{ pwType }}" placeholder="{{ pwPh }}" style="border:none; outline:none; background:none; flex:1; font-family:inherit; font-size:14px; color:#2A2320;">
+              <button type="button" onClick="{{ togglePwd }}" aria-label="Toggle password" style="background:none; border:none; cursor:pointer; padding:2px; color:#a99a7d; display:inline-flex;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              </button>
+            </div>
+            <div style="text-align:end; margin-top:10px;">
+              <a href="#" style="color:#C1912F; font-size:12.5px; font-weight:600; text-decoration:none;"><span class="ar">نسيتِ كلمة المرور؟</span><span class="en">Forgot Password?</span></a>
+            </div>
+          </div>
+          <button type="submit" class="btn-gold" style="width:100%; cursor:pointer; font-family:inherit; font-size:14px; font-weight:700; padding:15px; border-radius:12px; border:none; letter-spacing:.03em;"><span class="ar">تسجيل الدخول</span><span class="en">Login</span></button>
+        </form>
+        <div style="display:flex; align-items:center; gap:14px; margin:26px 0;">
+          <span style="flex:1; height:1px; background:#EFE7DA;"></span>
+          <span style="font-size:12px; color:#a99a7d; font-weight:600;"><span class="ar">أو</span><span class="en">OR</span></span>
+          <span style="flex:1; height:1px; background:#EFE7DA;"></span>
+        </div>
+        <button onClick="{{ loginSubmit }}" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; cursor:pointer; font-family:inherit; font-size:13.5px; font-weight:600; padding:14px; border-radius:12px; border:1px solid #D8CBB6; background:#fff; color:#2A2320;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#C1912F" stroke-width="1.8"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.9.33 1.79.63 2.65a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.43-1.2a2 2 0 0 1 2.11-.45c.86.3 1.75.51 2.65.63A2 2 0 0 1 22 16.92z"></path></svg>
+          <span class="ar">المتابعة برقم الهاتف</span><span class="en">Continue with Phone Number</span>
+        </button>
+        <p style="text-align:center; margin:26px 0 0; font-size:13.5px; color:#8a8072;"><span class="ar">ليس لديكِ حساب؟</span><span class="en">Don't have an account?</span> <a href="#" style="color:#C1912F; font-weight:700; text-decoration:none;"><span class="ar">إنشاء حساب</span><span class="en">Sign Up</span></a></p>
+      </div>
+    </div>
+  </div>
+</sc-if>
+
+<sc-if value="{{ showSite }}" hint-placeholder-val="{{ true }}">
+
+  <sc-if value="{{ barOpen }}" hint-placeholder-val="{{ true }}">
+  <div style="background:#2B0D12; color:#EDE3CF; font-size:13px; letter-spacing:.02em;">
+    <div style="max-width:1320px; margin:0 auto; padding:9px 26px; display:flex; align-items:center; justify-content:space-between; gap:18px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:22px; flex-wrap:wrap;">
+        <span style="display:inline-flex; align-items:center; gap:7px; font-weight:600; color:#E9CE7A;">
+          <span style="width:6px;height:6px;border-radius:50%;background:#C1912F;box-shadow:0 0 0 3px rgba(184,134,11,.25);"></span>
+          <span class="ar">أسعار الذهب اليوم</span><span class="en">Today's Gold Price</span>
+        </span>
+        <span style="opacity:.9;"><span class="ar">عيار ٢٤:&nbsp; ٤٬٧٢٠ ج.م</span><span class="en">24K:&nbsp; 4,720 EGP</span></span>
+        <span style="opacity:.55;">·</span>
+        <span style="opacity:.9;"><span class="ar">عيار ٢١:&nbsp; ٤٬١٣٠ ج.م</span><span class="en">21K:&nbsp; 4,130 EGP</span></span>
+        <span style="opacity:.55;">·</span>
+        <span style="opacity:.9;"><span class="ar">عيار ١٨:&nbsp; ٣٬٥٤٠ ج.م</span><span class="en">18K:&nbsp; 3,540 EGP</span></span>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <a href="https://wa.me/201001234567" target="_blank" style="display:inline-flex; align-items:center; gap:7px; color:#F5E9D8; text-decoration:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:#E9CE7A;"><path d="M12.02 2c-5.52 0-10 4.48-10 10 0 1.76.46 3.48 1.34 5L2 22l5.14-1.34A9.94 9.94 0 0 0 12.02 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.86 14.13c-.25.7-1.46 1.34-2.01 1.38-.55.05-1.06.24-3.56-.74-3.01-1.19-4.9-4.28-5.05-4.48-.15-.2-1.2-1.59-1.2-3.04 0-1.44.76-2.15 1.03-2.44.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.25.6.84 2.06.91 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.64 2.03 1.13 1 2.08 1.31 2.38 1.46.3.15.47.12.65-.07.17-.2.74-.87.94-1.16.2-.3.4-.25.66-.15.27.1 1.71.8 2 .95.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg>
+          <span dir="ltr" style="font-weight:600; letter-spacing:.03em;">010 0123 4567</span>
+        </a>
+        <button onClick="{{ dismissBar }}" aria-label="Close" class="icon-btn-light" style="background:none;border:none;color:#F5E9D8;opacity:.7;cursor:pointer;padding:2px;display:inline-flex;line-height:0;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  </sc-if>
+
+  <!-- HEADER -->
+  <header style="background:#3A1118; border-bottom:1px solid rgba(212,166,87,.20); position:sticky; top:0; z-index:90;">
+    <div style="max-width:1320px; margin:0 auto; padding:0 26px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:26px; padding:14px 0;">
+        <a href="#" onClick="{{ goHome }}" aria-label="Uno Jewellery" style="text-decoration:none; display:inline-flex; align-items:center; flex-shrink:0; line-height:1;">
+          <img src="images/uno-logo-gold.png" alt="Uno Jewellery" style="height:64px; width:auto; display:block; filter:drop-shadow(0 2px 6px rgba(0,0,0,.3));">
+        </a>
+        <nav class="navrow" style="display:flex; align-items:center; justify-content:center; gap:28px; flex:1; font-size:12.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;">
+          <a class="navlink" href="#" onClick="{{ goHome }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">الرئيسية</span><span class="en">Home</span></a>
+          <a class="navlink" href="#grid" onClick="{{ goGrid }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">وصل حديثاً</span><span class="en">New Arrivals</span></a>
+          <a class="navlink" href="#grid" onClick="{{ filterNecklaces }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">عقود</span><span class="en">Necklaces</span></a>
+          <a class="navlink" href="#grid" onClick="{{ filterRings }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">خواتم</span><span class="en">Rings</span></a>
+          <a class="navlink" href="#grid" onClick="{{ filterBracelets }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">أساور</span><span class="en">Bracelets</span></a>
+          <a class="navlink" href="#grid" onClick="{{ filterEarrings }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">حلق</span><span class="en">Earrings</span></a>
+          <a class="navlink" href="#story" onClick="{{ goStory }}" style="text-decoration:none; color:#E6DAC4;"><span class="ar">من نحن</span><span class="en">About</span></a>
+        </nav>
+        <div style="display:flex; align-items:center; gap:10px; flex-shrink:0;">
+          <button onClick="{{ toggleSearch }}" aria-label="Search" class="icon-btn-light" style="background:none;border:none;cursor:pointer;padding:8px;color:#F0E7D5;display:inline-flex;line-height:0;">
+            <svg class="flip" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.2-3.2"></path></svg>
+          </button>
+          <button onClick="{{ toggleLang }}" style="background:none;border:1px solid rgba(212,166,87,.4);border-radius:999px;cursor:pointer;padding:6px 14px;font-family:inherit;font-size:12.5px;font-weight:600;letter-spacing:.06em;color:#F0E7D5;display:inline-flex;align-items:center;gap:8px;">
+            <span style="{{ arActiveStyle }}">ع</span><span style="opacity:.4;">/</span><span style="{{ enActiveStyle }}">EN</span>
+          </button>
+          <button onClick="{{ goLogin }}" aria-label="Account" class="icon-btn-light" style="background:none;border:1px solid rgba(212,166,87,.35);border-radius:50%;width:38px;height:38px;cursor:pointer;color:#F0E7D5;display:inline-flex;align-items:center;justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="8" r="4"></circle><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"></path></svg>
+          </button>
+          <a href="https://wa.me/201001234567" target="_blank" class="btn-gold" style="display:inline-flex; align-items:center; gap:8px; text-decoration:none; padding:10px 18px; border-radius:999px; font-size:12.5px; font-weight:700;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.02 2c-5.52 0-10 4.48-10 10 0 1.76.46 3.48 1.34 5L2 22l5.14-1.34A9.94 9.94 0 0 0 12.02 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.86 14.13c-.25.7-1.46 1.34-2.01 1.38-.55.05-1.06.24-3.56-.74-3.01-1.19-4.9-4.28-5.05-4.48-.15-.2-1.2-1.59-1.2-3.04 0-1.44.76-2.15 1.03-2.44.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.25.6.84 2.06.91 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.64 2.03 1.13 1 2.08 1.31 2.38 1.46.3.15.47.12.65-.07.17-.2.74-.87.94-1.16.2-.3.4-.25.66-.15.27.1 1.71.8 2 .95.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg>
+            <span class="ar">اطلب الآن</span><span class="en">Order</span>
+          </a>
+        </div>
+      </div>
+
+      <sc-if value="{{ searchOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:0 0 14px;">
+        <div style="max-width:640px; margin:0 auto; display:flex; align-items:center; gap:10px; border:1px solid #D8CBB6; border-radius:999px; padding:10px 18px; background:#fff;">
+          <svg class="flip" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9a8f7d" stroke-width="1.6"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.2-3.2"></path></svg>
+          <input type="text" placeholder="{{ searchPlaceholder }}" style="border:none; outline:none; background:none; flex:1; font-family:inherit; font-size:14px; color:#2A2320;">
+        </div>
+      </div>
+      </sc-if>
+
+    </div>
+  </header>
+
+  <sc-if value="{{ isProduct }}" hint-placeholder-val="{{ false }}">
+  <section data-screen-label="Product Detail" style="max-width:1320px; margin:0 auto; padding:34px 26px 100px;">
+    <nav style="display:flex; align-items:center; gap:9px; font-size:12.5px; color:#8a8072; margin-bottom:24px; flex-wrap:wrap;">
+      <a href="#" onClick="{{ goHome }}" style="color:#8a8072; text-decoration:none;"><span class="ar">الرئيسية</span><span class="en">Home</span></a>
+      <svg class="flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"></path></svg>
+      <a href="#" onClick="{{ backToShop }}" style="color:#8a8072; text-decoration:none;"><span class="ar">{{ selected.catAr }}</span><span class="en">{{ selected.catEn }}</span></a>
+      <svg class="flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"></path></svg>
+      <span style="color:#2A2320; font-weight:600;"><span class="ar">{{ selected.nameAr }}</span><span class="en">{{ selected.nameEn }}</span></span>
+    </nav>
+
+    <button onClick="{{ backToShop }}" class="icon-btn-dark" style="display:inline-flex; align-items:center; gap:8px; background:none; border:1px solid #E4DACB; cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:700; color:#4a4238; padding:9px 16px; border-radius:999px; margin-bottom:30px;">
+      <svg class="flip" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg>
+      <span class="ar">العودة إلى المتجر</span><span class="en">Back to Shop</span>
+    </button>
+
+    <div class="pdpgrid">
+      <div>
+        <div style="position:relative; aspect-ratio:1; border-radius:6px; overflow:hidden; background:#EFE7DA;">
+          <sc-if value="{{ activeGalleryItem.real }}" hint-placeholder-val="{{ false }}">
+            <img src="{{ activeGalleryItem.img }}" alt="{{ selected.alt }}" style="width:100%; height:100%; object-fit:cover; object-position:{{ activeGalleryItem.pos }};">
+          </sc-if>
+          <sc-if value="{{ activeGalleryItem.notReal }}" hint-placeholder-val="{{ true }}">
+            <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; background:repeating-linear-gradient(135deg,#E7D9BE,#E7D9BE 12px,#EADFC7 12px,#EADFC7 24px);">
+              <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#B79A54" stroke-width="1.3"><path d="M3 21V9l9-6 9 6v12"></path><path d="M9 21v-6h6v6"></path></svg>
+              <div style="font-family:'Courier New',monospace; font-size:11.5px; color:#9a7f3f;"><span class="ar">{{ activeGalleryItem.capAr }}</span><span class="en">{{ activeGalleryItem.capEn }}</span></div>
+            </div>
+          </sc-if>
+          <sc-if value="{{ selected.isOut }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute; top:14px; inset-inline-start:14px; background:#2A2320; color:#F5EAD6; font-size:11.5px; font-weight:700; padding:6px 13px; border-radius:999px;"><span class="ar">غير متوفر</span><span class="en">Out of Stock</span></span>
+          </sc-if>
+        </div>
+        <div style="display:flex; gap:12px; margin-top:14px;">
+          <sc-for list="{{ gallery }}" as="g" hint-placeholder-count="3">
+            <div class="thumb" data-active="{{ g.isActive }}" onClick="{{ g.on }}" style="width:72px; height:72px; border-radius:4px; overflow:hidden; cursor:pointer; position:relative; background:#EFE7DA;">
+              <sc-if value="{{ g.real }}" hint-placeholder-val="{{ false }}"><img src="{{ g.img }}" style="width:100%; height:100%; object-fit:cover; object-position:{{ g.pos }};"></sc-if>
+              <sc-if value="{{ g.notReal }}" hint-placeholder-val="{{ true }}"><div style="width:100%; height:100%; background:repeating-linear-gradient(135deg,#E7D9BE,#E7D9BE 8px,#EADFC7 8px,#EADFC7 16px);"></div></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+      <div>
+        <div style="color:#a99a7d; font-size:12px; font-weight:600; letter-spacing:.1em; margin-bottom:10px;"><span class="ar">{{ selected.catAr }} · {{ selected.karatAr }}</span><span class="en">{{ selected.catEn }} · {{ selected.karatEn }}</span></div>
+        <h1 class="disp" style="margin:0 0 14px; font-size:clamp(26px,3vw,36px); font-weight:700; line-height:1.25;"><span class="ar">{{ selected.nameAr }}</span><span class="en">{{ selected.nameEn }}</span></h1>
+
+        <div style="display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
+          <span style="font-size:32px; font-weight:700; color:#2A2320;"><span class="ar">{{ selected.priceAr }} ج.م</span><span class="en">{{ selected.priceEn }} EGP</span></span>
+          <sc-if value="{{ selected.hasCompare }}" hint-placeholder-val="{{ false }}">
+            <span style="font-size:16px; color:#b3a892; text-decoration:line-through;"><span class="ar">{{ selected.comparePriceAr }}</span><span class="en">{{ selected.comparePriceEn }}</span></span>
+            <span style="font-size:12px; font-weight:700; color:#8B4513; background:#F5EAD6; padding:4px 10px; border-radius:999px;"><span class="ar">خصم {{ selected.discountAr }}٪</span><span class="en">{{ selected.discountEn }}% off</span></span>
+          </sc-if>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <sc-if value="{{ selected.isOut }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#8a7a68;"><span style="width:7px;height:7px;border-radius:50%;background:#8a7a68;"></span><span class="ar">غير متوفر حالياً</span><span class="en">Currently out of stock</span></span>
+          </sc-if>
+          <sc-if value="{{ selected.avlOrder }}" hint-placeholder-val="{{ false }}">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#8B4513;"><span style="width:7px;height:7px;border-radius:50%;background:#8B4513;"></span><span class="ar">حسب الطلب · التسليم خلال ٧-١٠ أيام</span><span class="en">Made to order · ships in 7–10 days</span></span>
+          </sc-if>
+          <sc-if value="{{ selected.inStock }}" hint-placeholder-val="{{ true }}">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:#2A6B4E;"><span style="width:7px;height:7px;border-radius:50%;background:#2A6B4E;"></span><span class="ar">متوفر الآن للشحن الفوري</span><span class="en">In stock, ready to ship</span></span>
+          </sc-if>
+        </div>
+
+        <p style="font-size:15px; line-height:1.85; color:#4a4238; margin:0 0 26px; font-weight:300;"><span class="ar">{{ selected.descAr }}</span><span class="en">{{ selected.descEn }}</span></p>
+
+        <div style="border-top:1px solid #EFE7DA; padding-top:20px; margin-bottom:24px; display:flex; flex-direction:column; gap:12px;">
+          <sc-for list="{{ specs }}" as="row" hint-placeholder-count="4">
+            <div style="display:flex; align-items:center; justify-content:space-between; font-size:13.5px;">
+              <span style="color:#8a8072;"><span class="ar">{{ row.labelAr }}</span><span class="en">{{ row.labelEn }}</span></span>
+              <span style="color:#2A2320; font-weight:600;"><span class="ar">{{ row.valAr }}</span><span class="en">{{ row.valEn }}</span></span>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-bottom:28px;">
+          <sc-if value="{{ selected.isOut }}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{ notifyRequested }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; align-items:center; justify-content:center; gap:8px; padding:16px; border-radius:12px; background:#F5EAD6; color:#8B4513; font-size:13.5px; font-weight:700;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"></path></svg>
+                <span class="ar">سيتم إعلامكِ عند التوفر</span><span class="en">You'll be notified when available</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{ notifyNotRequested }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ notifyMe }}" style="flex:1; cursor:pointer; font-family:inherit; font-size:14px; font-weight:700; padding:16px; border-radius:12px; border:1.5px solid #2A2320; background:none; color:#2A2320;">
+                <span class="ar">أعلميني عند التوفر</span><span class="en">Notify Me When Available</span>
+              </button>
+            </sc-if>
+          </sc-if>
+          <sc-if value="{{ selected.notOut }}" hint-placeholder-val="{{ true }}">
+            <a href="{{ selected.wa }}" target="_blank" class="btn-gold" style="flex:1; display:flex; align-items:center; justify-content:center; gap:10px; text-decoration:none; padding:16px; border-radius:12px; font-size:14.5px; font-weight:700;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.02 2c-5.52 0-10 4.48-10 10 0 1.76.46 3.48 1.34 5L2 22l5.14-1.34A9.94 9.94 0 0 0 12.02 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.86 14.13c-.25.7-1.46 1.34-2.01 1.38-.55.05-1.06.24-3.56-.74-3.01-1.19-4.9-4.28-5.05-4.48-.15-.2-1.2-1.59-1.2-3.04 0-1.44.76-2.15 1.03-2.44.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.25.6.84 2.06.91 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.64 2.03 1.13 1 2.08 1.31 2.38 1.46.3.15.47.12.65-.07.17-.2.74-.87.94-1.16.2-.3.4-.25.66-.15.27.1 1.71.8 2 .95.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg>
+              <span class="ar">اطلب عبر واتساب</span><span class="en">Order via WhatsApp</span>
+            </a>
+          </sc-if>
+          <button onClick="{{ toggleWishlist }}" aria-label="Wishlist" class="icon-btn-dark" style="width:54px; height:54px; flex-shrink:0; border-radius:12px; border:1.5px solid #E4DACB; background:#fff; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#8B4513;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="{{ heartFill }}" stroke="currentColor" stroke-width="1.7"><path d="M12 21s-7-4.35-9.5-8.5C.5 9 2 5 6 5c2 0 3.5 1.2 4 2.5C10.5 6.2 12 5 14 5c4 0 5.5 4 3.5 7.5C19 16.65 12 21 12 21z"></path></svg>
+          </button>
+        </div>
+
+        <div style="display:flex; gap:22px; padding:20px 0; border-top:1px solid #EFE7DA; border-bottom:1px solid #EFE7DA; margin-bottom:8px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#4a4238;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="1.7"><path d="M12 2l8 4v6c0 5-3.4 8.4-8 10-4.6-1.6-8-5-8-10V6l8-4z"></path><path d="M9 12l2 2 4-4"></path></svg>
+            <span class="ar">شهادة الجودة</span><span class="en">Certified Quality</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#4a4238;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="1.7"><path d="M7 11V7a5 5 0 0 1 10 0v4"></path><rect x="4" y="11" width="16" height="10" rx="2"></rect></svg>
+            <span class="ar">صناعة يدوية</span><span class="en">Handmade</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:#4a4238;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B4513" stroke-width="1.7"><path d="M4 4v6h6M20 20v-6h-6"></path><path d="M20 10a8 8 0 0 0-14.9-3M4 14a8 8 0 0 0 14.9 3"></path></svg>
+            <span class="ar">استبدال خلال ١٤ يوم</span><span class="en">14-Day Exchange</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="acc-row" onClick="{{ toggleShip }}" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:16px 4px; border-top:1px solid #EFE7DA; border-radius:8px;">
+            <span style="font-size:13.5px; font-weight:700;"><span class="ar">الشحن والتسليم</span><span class="en">Shipping &amp; Delivery</span></span>
+            <svg class="acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a4238" stroke-width="1.8" style="transform:{{ shipChevRot }}; transition:transform .25s ease;"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+          <div style="max-height:{{ shipMax }}; overflow:hidden; transition:max-height .35s ease;">
+            <p style="font-size:13.5px; line-height:1.8; color:#8a8072; margin:0 0 16px; padding:0 4px; font-weight:300;"><span class="ar">التوصيل خلال ٢-٤ أيام عمل داخل القاهرة والجيزة، و٤-٧ أيام لباقي المحافظات. يتم التواصل معكِ عبر واتساب لتأكيد الطلب والعنوان قبل الشحن.</span><span class="en">Delivery within 2–4 business days in Cairo &amp; Giza, 4–7 days elsewhere in Egypt. We confirm your order and address by WhatsApp before shipping.</span></p>
+          </div>
+          <div class="acc-row" onClick="{{ toggleCare }}" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:16px 4px; border-top:1px solid #EFE7DA; border-radius:8px;">
+            <span style="font-size:13.5px; font-weight:700;"><span class="ar">العناية بالقطعة</span><span class="en">Care Instructions</span></span>
+            <svg class="acc-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a4238" stroke-width="1.8" style="transform:{{ careChevRot }}; transition:transform .25s ease;"><path d="M6 9l6 6 6-6"></path></svg>
+          </div>
+          <div style="max-height:{{ careMax }}; overflow:hidden; transition:max-height .35s ease;">
+            <p style="font-size:13.5px; line-height:1.8; color:#8a8072; margin:0 0 16px; padding:0 4px; font-weight:300;"><span class="ar">احفظي القطعة بعيداً عن الماء والعطور، ونظفيها بقطعة قماش ناعمة وجافة للحفاظ على بريقها.</span><span class="en">Keep away from water and perfume, and clean with a soft dry cloth to preserve its shine.</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:86px;">
+      <h2 class="disp" style="margin:0 0 26px; font-size:24px; font-weight:700;"><span class="ar">قد يعجبكِ أيضاً</span><span class="en">You May Also Like</span></h2>
+      <div class="relgrid">
+        <sc-for list="{{ related }}" as="r" hint-placeholder-count="4">
+          <div class="card" onClick="{{ r.view }}" style="cursor:pointer;">
+            <div class="card-img" style="position:relative; aspect-ratio:1; border-radius:4px; overflow:hidden; background:#EFE7DA;">
+              <sc-if value="{{ r.img }}" hint-placeholder-val="{{ false }}">
+              <img src="{{ r.img }}" alt="{{ r.alt }}" style="width:100%; height:100%; object-fit:cover; object-position:{{ r.pos }};">
+              </sc-if>
+            </div>
+            <div style="padding:12px 2px 0; text-align:start;">
+              <div class="disp" style="font-size:14.5px; font-weight:700; line-height:1.3;"><span class="ar">{{ r.nameAr }}</span><span class="en">{{ r.nameEn }}</span></div>
+              <div style="font-size:13.5px; font-weight:700; color:#2A2320; margin-top:5px;"><span class="ar">{{ r.priceAr }} ج.م</span><span class="en">{{ r.priceEn }} EGP</span></div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+  </sc-if>
+
+  <sc-if value="{{ isShop }}" hint-placeholder-val="{{ true }}">
+
+  <!-- HERO -->
+  <section class="hero-wrap" data-screen-label="Home" style="position:relative; height:86vh; min-height:560px; overflow:hidden; background:#2B0D12;">
+    <img src="images/cuff.jpg" alt="Signature gold cuff" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 22%;">
+    <div class="hero-ov" style="position:absolute; inset:0;"></div>
+    <div style="position:absolute; inset:0; background:linear-gradient(0deg, rgba(43,13,18,.78) 0%, rgba(43,13,18,.22) 32%, rgba(43,13,18,0) 55%);"></div>
+    <div style="position:absolute; inset:0; display:flex; align-items:flex-end;">
+      <div style="max-width:1320px; margin:0 auto; width:100%; padding:0 26px 64px;">
+        <div style="max-width:560px;">
+          <div style="display:inline-flex; align-items:center; gap:9px; color:#E9CE7A; font-size:12px; font-weight:600; letter-spacing:.28em; margin-bottom:22px;">
+            <span style="width:26px; height:1px; background:#C1912F;"></span>
+            <span class="ar">صناعة مصرية فاخرة</span><span class="en">EGYPTIAN FINE JEWELRY</span>
+          </div>
+          
+          <h1 class="disp hero-h" style="margin:0; color:#FFFDF8; font-size:clamp(38px,5.6vw,68px); font-weight:700; text-shadow:0 2px 24px rgba(43,13,18,.55);">
+            <span class="ar">ذهبٌ مصريٌّ أصيل<br>وصياغةٌ تُروى للأجيال</span>
+            <span class="en" style="font-style:italic;">Authentic Egyptian gold,<br>crafted for generations</span>
+          </h1><p style="color:#F2E4D9; font-size:17px; line-height:1.75; margin:22px 0 32px; max-width:440px; font-weight:400; text-shadow:0 1px 12px rgba(43,13,18,.5);">
+            <span class="ar">من قلب القاهرة، نصوغ لكِ قطعاً يدويةً من الذهب والفضة — كل قطعةٍ حكاية تُروى.</span>
+            <span class="en">From the heart of Cairo, handcrafted gold and silver pieces — every one a story worth telling.</span>
+          </p>
+          <a href="#grid" onClick="{{ goGrid }}" class="btn-gold" style="display:inline-flex; align-items:center; gap:12px; text-decoration:none; padding:16px 34px; border-radius:999px; font-size:15px; font-weight:700;">
+            <span class="ar">تسوّق وصل حديثاً</span><span class="en">Shop New Arrivals</span>
+            <svg class="flip" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h13M12 5l7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATEGORY STRIP -->
+  <section style="max-width:1320px; margin:0 auto; padding:94px 26px 46px;">
+    <div style="text-align:center; margin-bottom:42px;">
+      <div style="color:#C1912F; font-size:12px; font-weight:600; letter-spacing:.26em; margin-bottom:12px;"><span class="ar">تسوّق حسب الفئة</span><span class="en">SHOP BY CATEGORY</span></div>
+      <h2 class="disp" style="margin:0; font-size:clamp(28px,3.4vw,40px); font-weight:700;"><span class="ar">مجموعاتنا</span><span class="en">Our Collections</span></h2>
+    </div>
+    <div class="catstrip">
+      <div class="catcard" onClick="{{ filterNecklaces }}" style="text-align:center; cursor:pointer;">
+        <div style="aspect-ratio:1; border-radius:50%; overflow:hidden; border:3px solid #E7C98A; box-shadow:0 0 0 1px rgba(184,134,11,.3), 0 16px 38px rgba(139,69,19,.16);"><img src="images/nk-serpent.png" alt="Necklaces" style="width:100%; height:100%; object-fit:cover; object-position:center 45%;"></div>
+        <div class="disp" style="margin-top:18px; font-size:21px; font-weight:700;"><span class="ar">عقود</span><span class="en">Necklaces</span></div>
+        <div style="color:#8a8072; font-size:12.5px; margin-top:3px;"><span class="ar">٧ قطع</span><span class="en">7 pieces</span></div>
+      </div>
+      <div class="catcard" onClick="{{ filterRings }}" style="text-align:center; cursor:pointer;">
+        <div style="aspect-ratio:1; border-radius:50%; overflow:hidden; border:3px solid #E7C98A; box-shadow:0 0 0 1px rgba(184,134,11,.3), 0 16px 38px rgba(139,69,19,.16);"><img src="images/rg-hearts.png" alt="Rings" style="width:100%; height:100%; object-fit:cover; object-position:center 40%;"></div>
+        <div class="disp" style="margin-top:18px; font-size:21px; font-weight:700;"><span class="ar">خواتم</span><span class="en">Rings</span></div>
+        <div style="color:#8a8072; font-size:12.5px; margin-top:3px;"><span class="ar">١٣ قطعة</span><span class="en">13 pieces</span></div>
+      </div>
+      <div class="catcard" onClick="{{ filterBracelets }}" style="text-align:center; cursor:pointer;">
+        <div style="aspect-ratio:1; border-radius:50%; overflow:hidden; border:3px solid #E7C98A; box-shadow:0 0 0 1px rgba(184,134,11,.3), 0 16px 38px rgba(139,69,19,.16);"><img src="images/br-diamond-band.jpg" alt="Bracelets" style="width:100%; height:100%; object-fit:cover; object-position:center 80%;"></div>
+        <div class="disp" style="margin-top:18px; font-size:21px; font-weight:700;"><span class="ar">أساور</span><span class="en">Bracelets</span></div>
+        <div style="color:#8a8072; font-size:12.5px; margin-top:3px;"><span class="ar">١٠ قطع</span><span class="en">10 pieces</span></div>
+      </div>
+      <div class="catcard" onClick="{{ filterEarrings }}" style="text-align:center; cursor:pointer;">
+        <div style="aspect-ratio:1; border-radius:50%; overflow:hidden; border:3px solid #E7C98A; box-shadow:0 0 0 1px rgba(184,134,11,.3), 0 16px 38px rgba(139,69,19,.16);"><img src="images/er-hoop-lg.jpg" alt="Earrings" style="width:100%; height:100%; object-fit:cover; object-position:center 42%;"></div>
+        <div class="disp" style="margin-top:18px; font-size:21px; font-weight:700;"><span class="ar">حلق</span><span class="en">Earrings</span></div>
+        <div style="color:#8a8072; font-size:12.5px; margin-top:3px;"><span class="ar">٥ قطع</span><span class="en">5 pieces</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CATALOG: breadcrumb + shell -->
+  <div class="catalog-shell">
+  <section id="grid" data-screen-label="Shop" style="max-width:1320px; margin:0 auto; padding:72px 26px 90px;">
+    <nav style="display:flex; align-items:center; gap:9px; font-size:12.5px; color:#8a8072; margin-bottom:24px;">
+      <a href="#" onClick="{{ goHome }}" style="color:#8a8072; text-decoration:none;"><span class="ar">الرئيسية</span><span class="en">Home</span></a>
+      <svg class="flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"></path></svg>
+      <a href="#" style="color:#8a8072; text-decoration:none;"><span class="ar">المجوهرات</span><span class="en">Jewelry</span></a>
+      <svg class="flip" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"></path></svg>
+      <span style="color:#2A2320; font-weight:600;"><span class="ar">المتجر</span><span class="en">Shop All</span></span>
+    </nav>
+
+    <div class="shell">
+      <!-- SIDEBAR (start side: right in RTL, left in EN) -->
+      <aside class="filterbox" style="align-self:start;">
+        <div style="border:1px solid #E9E0D2; border-radius:16px; background:#fff; padding:22px 20px;">
+          <div class="drawer-handle" style="display:none; position:relative; align-items:center; justify-content:space-between; margin:-4px 0 14px;">
+            <span style="position:absolute; inset-inline:0; top:-6px; margin:0 auto; width:44px; height:4px; border-radius:99px; background:#E0D5C2;"></span>
+            <div class="disp" style="font-size:19px; font-weight:700; padding-top:6px;"><span class="ar">تصفية النتائج</span><span class="en">Filter Results</span></div>
+            <button onClick="{{ closeFilter }}" aria-label="Close" class="icon-btn-dark" style="background:none;border:none;cursor:pointer;padding:6px;color:#2A2320;display:inline-flex;line-height:0;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+            <div class="disp" style="font-size:18px; font-weight:700;"><span class="ar">تصفية</span><span class="en">Filter</span></div>
+            <button onClick="{{ clearFilters }}" style="background:none; border:none; cursor:pointer; color:#C1912F; font-family:inherit; font-size:12px; font-weight:600;"><span class="ar">مسح الكل</span><span class="en">Clear all</span></button>
+          </div>
+
+          <div style="height:1px; background:#EFE7DA; margin:16px 0;"></div>
+          <div style="font-size:13px; font-weight:700; letter-spacing:.02em; margin-bottom:13px;"><span class="ar">العيار</span><span class="en">Karat</span></div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <sc-for list="{{ karatOpts }}" as="opt" hint-placeholder-count="5">
+              <button onClick="{{ opt.on }}" data-active="{{ opt.active }}" style="cursor:pointer; font-family:inherit; font-size:12.5px; font-weight:600; padding:8px 14px; border-radius:999px; border:1px solid #E4DACB; background:#FBF3E9; color:#2A2320;" data-chip="1">
+                <span class="ar">{{ opt.ar }}</span><span class="en">{{ opt.en }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="height:1px; background:#EFE7DA; margin:18px 0;"></div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:11px;"><span class="ar">الصنف</span><span class="en">Category</span></div>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <sc-for list="{{ catOpts }}" as="opt" hint-placeholder-count="5">
+              <button onClick="{{ opt.on }}" data-active="{{ opt.active }}" style="cursor:pointer; font-family:inherit; font-size:13.5px; text-align:start; padding:8px 10px; border-radius:9px; border:none; background:none; color:#4a4238; display:flex; align-items:center; justify-content:space-between; gap:8px;" data-row="1">
+                <span><span class="ar">{{ opt.ar }}</span><span class="en">{{ opt.en }}</span></span>
+                <span style="font-size:11.5px; color:#b3a892;">{{ opt.count }}</span>
+              </button>
+            </sc-for>
+          </div>
+
+          <div style="height:1px; background:#EFE7DA; margin:18px 0;"></div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:14px;"><span class="ar">نطاق السعر</span><span class="en">Price Range</span></div>
+          <input type="range" class="goldrange" min="3000" max="40000" step="500" value="{{ maxPrice }}" style="--fill:{{ fillPct }}; width:100%;" onInput="{{ setMaxPrice }}">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:11px; font-size:12.5px; color:#4a4238;">
+            <span><span class="ar">حتى</span><span class="en">Up to</span></span>
+            <span style="font-weight:700; color:#2A2320;"><span class="ar">{{ maxPriceAr }} ج.م</span><span class="en">{{ maxPriceEn }} EGP</span></span>
+          </div>
+
+          <div style="height:1px; background:#EFE7DA; margin:18px 0;"></div>
+          <div style="font-size:13px; font-weight:700; margin-bottom:13px;"><span class="ar">التوفر</span><span class="en">Availability</span></div>
+          <div style="display:flex; flex-direction:column; gap:9px;">
+            <sc-for list="{{ availOpts }}" as="opt" hint-placeholder-count="3">
+              <label onClick="{{ opt.on }}" style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:13.5px; color:#4a4238;">
+                <span data-active="{{ opt.active }}" style="width:17px; height:17px; border-radius:50%; border:1.5px solid #C1912F; display:inline-flex; align-items:center; justify-content:center;" data-radio="1"><span data-active="{{ opt.active }}" style="width:8px; height:8px; border-radius:50%; background:#C1912F;" data-dot="1"></span></span>
+                <span class="ar">{{ opt.ar }}</span><span class="en">{{ opt.en }}</span>
+              </label>
+            </sc-for>
+          </div>
+
+          <button class="drawer-apply btn-gold" onClick="{{ closeFilter }}" style="display:none; width:100%; margin-top:22px; cursor:pointer; font-family:inherit; font-size:14px; font-weight:700; padding:14px; border-radius:12px; border:none;"><span class="ar">عرض {{ countAr }} قطعة</span><span class="en">Show {{ resultCount }} pieces</span></button>
+        </div>
+      </aside>
+
+      <!-- PRODUCTS -->
+      <div>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:22px; flex-wrap:wrap;">
+          <div>
+            <h2 class="disp" style="margin:0; font-size:26px; font-weight:700;"><span class="ar">كل القطع</span><span class="en">All Pieces</span></h2>
+            <div style="color:#8a8072; font-size:13px; margin-top:4px;"><span class="ar">{{ countAr }} قطعة</span><span class="en">{{ resultCount }} pieces</span></div>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px;">
+            <button onClick="{{ toggleLoadingPreview }}" style="display:inline-flex; align-items:center; gap:6px; background:none; border:none; cursor:pointer; font-family:inherit; font-size:11.5px; color:#b3a892; padding:6px 4px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 3"></path></svg>
+              <span class="ar">معاينة التحميل</span><span class="en">Preview loading</span>
+            </button>
+            <button class="mobile-filter-btn btn-outline" onClick="{{ openFilter }}" style="align-items:center; gap:8px; cursor:pointer; font-family:inherit; font-size:13px; font-weight:700; padding:10px 18px; border-radius:999px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 6h16M7 12h10M10 18h4"></path></svg>
+              <span class="ar">تصفية</span><span class="en">Filter</span>
+            </button>
+            <div style="display:flex; align-items:center; gap:8px; border:1px solid #D8CBB6; border-radius:999px; padding:9px 14px; background:#fff; font-size:13px; color:#4a4238;">
+              <span class="ar">ترتيب: الأحدث</span><span class="en">Sort: Newest</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+          </div>
+        </div>
+
+        <sc-if value="{{ previewLoading }}" hint-placeholder-val="{{ false }}">
+        <div class="prodgrid">
+          <sc-for list="{{ skeletonItems }}" as="s" hint-placeholder-count="8">
+            <div>
+              <div class="skel" style="aspect-ratio:4/5; border-radius:4px;"></div>
+              <div style="padding:14px 2px 4px;">
+                <div class="skel" style="height:9px; width:70px; border-radius:5px; margin-bottom:10px;"></div>
+                <div class="skel" style="height:16px; width:88%; border-radius:5px; margin-bottom:8px;"></div>
+                <div class="skel" style="height:16px; width:55%; border-radius:5px;"></div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ notPreviewLoading }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ true }}">
+        <div class="prodgrid">
+          <sc-for list="{{ products }}" as="p" hint-placeholder-count="8">
+            <div class="card" data-disabled="{{ p.isOutAttr }}" onClick="{{ p.view }}" style="cursor:pointer;">
+              <div class="card-img" style="position:relative; aspect-ratio:4/5; border-radius:4px; overflow:hidden; background:#EFE7DA;">
+                <sc-if value="{{ p.img }}" hint-placeholder-val="{{ false }}">
+                <img src="{{ p.img }}" alt="{{ p.alt }}" style="width:100%; height:100%; object-fit:cover; object-position:{{ p.pos }};">
+                </sc-if>
+                <sc-if value="{{ p.badge }}" hint-placeholder-val="{{ false }}">
+                  <span style="position:absolute; top:11px; inset-inline-start:11px; background:{{ p.badgeBg }}; color:{{ p.badgeFg }}; font-size:11px; font-weight:700; padding:5px 11px; border-radius:999px; letter-spacing:.02em;"><span class="ar">{{ p.badgeAr }}</span><span class="en">{{ p.badgeEn }}</span></span>
+                </sc-if>
+                <sc-if value="{{ p.notOut }}" hint-placeholder-val="{{ true }}">
+                <div class="card-wa" style="position:absolute; inset-inline:11px; bottom:11px;">
+                  <a href="{{ p.wa }}" target="_blank" onClick="{{ p.waClick }}" class="btn-gold" style="display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; padding:12px; border-radius:12px; font-size:13px; font-weight:700;">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12.02 2c-5.52 0-10 4.48-10 10 0 1.76.46 3.48 1.34 5L2 22l5.14-1.34A9.94 9.94 0 0 0 12.02 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.86 14.13c-.25.7-1.46 1.34-2.01 1.38-.55.05-1.06.24-3.56-.74-3.01-1.19-4.9-4.28-5.05-4.48-.15-.2-1.2-1.59-1.2-3.04 0-1.44.76-2.15 1.03-2.44.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.25.6.84 2.06.91 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.64 2.03 1.13 1 2.08 1.31 2.38 1.46.3.15.47.12.65-.07.17-.2.74-.87.94-1.16.2-.3.4-.25.66-.15.27.1 1.71.8 2 .95.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg>
+                    <span class="ar">اطلب عبر واتساب</span><span class="en">Order via WhatsApp</span>
+                  </a>
+                </div>
+                </sc-if>
+              </div>
+              <div style="padding:14px 2px 4px; text-align:start;">
+                <div style="color:#a99a7d; font-size:11px; font-weight:600; letter-spacing:.08em; margin-bottom:5px;"><span class="ar">{{ p.catAr }} · {{ p.karatAr }}</span><span class="en">{{ p.catEn }} · {{ p.karatEn }}</span></div>
+                <div class="disp pname" style="font-size:17px; font-weight:700; line-height:1.3;"><span class="ar">{{ p.nameAr }}</span><span class="en">{{ p.nameEn }}</span></div>
+                <div style="display:flex; align-items:baseline; gap:8px; margin-top:7px; min-height:24px; flex-wrap:wrap;">
+                  <span style="font-size:16px; font-weight:700; color:#2A2320;"><span class="ar">{{ p.priceAr }} ج.م</span><span class="en">{{ p.priceEn }} EGP</span></span>
+                  <sc-if value="{{ p.hasCompare }}" hint-placeholder-val="{{ false }}">
+                    <span style="font-size:12px; color:#b3a892; text-decoration:line-through;"><span class="ar">{{ p.comparePriceAr }}</span><span class="en">{{ p.comparePriceEn }}</span></span>
+                  </sc-if>
+                  <sc-if value="{{ p.avlOrder }}" hint-placeholder-val="{{ false }}"><span style="font-size:11.5px; color:#8B4513; font-weight:600;"><span class="ar">حسب الطلب</span><span class="en">Made to order</span></span></sc-if>
+                </div>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+        </sc-if>
+
+        <sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}">
+        <div style="text-align:center; padding:70px 20px; color:#8a8072;">
+          <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#C1912F" stroke-width="1.3" style="margin-bottom:16px;"><path d="M6 3h12l3 5-9 13L3 8z"></path><path d="M3 8h18M8.5 3L12 8l3.5-5M12 8l-3 13M12 8l3 13"></path></svg>
+          <div class="disp" style="font-size:22px; color:#2A2320; margin-bottom:8px;"><span class="ar">لا توجد قطع مطابقة</span><span class="en">No matching pieces</span></div>
+          <p style="font-size:14px; margin:0 0 18px;"><span class="ar">جرّبي تعديل عوامل التصفية</span><span class="en">Try adjusting your filters</span></p>
+          <button onClick="{{ clearFilters }}" class="btn-gold" style="cursor:pointer; font-family:inherit; font-size:13px; font-weight:600; padding:11px 22px; border-radius:999px; border:none;"><span class="ar">مسح عوامل التصفية</span><span class="en">Clear filters</span></button>
+        </div>
+        </sc-if>
+        </sc-if>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  <!-- BRAND STORY -->
+  <section id="story" data-screen-label="About" style="background:#3A1118; margin-top:0;">
+    <div class="storygrid" style="max-width:1320px; margin:0 auto; padding:0; display:grid; grid-template-columns:1fr 1fr; align-items:stretch;">
+      <div style="min-height:440px; position:relative; overflow:hidden;">
+        <img src="images/workshop.png" alt="Uno atelier workbench" style="position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center;">
+      </div>
+      <div style="padding:78px 62px; display:flex; flex-direction:column; justify-content:center;">
+        <div style="color:#D4A657; font-size:12px; font-weight:600; letter-spacing:.26em; margin-bottom:16px;"><span class="ar">قصتنا · منذ ٢٠٢٥</span><span class="en">OUR STORY · SINCE 2025</span></div>
+        <h2 class="disp" style="margin:0 0 20px; font-size:clamp(28px,3.4vw,42px); font-weight:700; line-height:1.2; color:#F5EAD6;"><span class="ar">تُصاغ باليد في القاهرة</span><span class="en">Handmade in Cairo</span></h2>
+        <p style="font-size:15.5px; line-height:1.9; color:#D9C4BC; margin:0 0 18px; font-weight:300;">
+          <span class="ar">بدأت اونو في أواخر ٢٠٢٥ كورشةٍ صغيرةٍ في قلب القاهرة، على يد صاغةٍ مصريين توارثوا الحرفة أباً عن جد. كل قطعةٍ تمرّ بين أيدٍ ماهرة — من التصميم إلى الصبّ والتشطيب — لتحمل روح الصناعة المصرية الأصيلة.</span>
+          <span class="en">Uno began in late 2025 as a small atelier in the heart of Cairo, led by Egyptian goldsmiths who inherited the craft across generations. Every piece passes through skilled hands — from design to casting to finishing — carrying the spirit of authentic Egyptian craftsmanship.</span>
+        </p>
+        <p style="font-size:15.5px; line-height:1.9; color:#D9C4BC; margin:0 0 30px; font-weight:300;">
+          <span class="ar">نستخدم الذهب والفضة الخالصة بعياراتٍ موثّقة، ونضمن لكِ قطعةً تدوم وتُورَّث.</span>
+          <span class="en">We use certified solid gold and silver, guaranteeing a piece that lasts and is meant to be passed down.</span>
+        </p>
+        <div style="display:flex; gap:40px; flex-wrap:wrap;">
+          <div><div class="disp" style="font-size:34px; font-weight:700; color:#D4A657;"><span class="ar">٢٠٢٥</span><span class="en">2025</span></div><div style="font-size:12.5px; color:#B08F88; margin-top:2px;"><span class="ar">سنة التأسيس</span><span class="en">Founded</span></div></div>
+          <div><div class="disp" style="font-size:34px; font-weight:700; color:#D4A657;"><span class="ar">٪١٠٠</span><span class="en">100%</span></div><div style="font-size:12.5px; color:#B08F88; margin-top:2px;"><span class="ar">صناعة يدوية</span><span class="en">Handmade</span></div></div>
+          <div><div class="disp" style="font-size:34px; font-weight:700; color:#D4A657;"><span class="ar">+ألف</span><span class="en">1K+</span></div><div style="font-size:12.5px; color:#B08F88; margin-top:2px;"><span class="ar">عميلة سعيدة</span><span class="en">Happy clients</span></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SOCIAL PROOF -->
+  <div class="feed-shell">
+  <section style="max-width:1320px; margin:0 auto; padding:94px 26px 40px;">
+    <div style="text-align:center;">
+      <div style="color:#C1912F; font-size:12px; font-weight:600; letter-spacing:.26em; margin-bottom:10px;"><span class="ar">تابعونا على انستجرام</span><span class="en">FOLLOW US ON INSTAGRAM</span></div>
+      <a href="https://instagram.com/UnoJewelleryEG" target="_blank" class="disp" style="font-size:clamp(24px,3vw,34px); font-weight:700; color:#2A2320; text-decoration:none;">@UnoJewelleryEG</a>
+    </div>
+  </section>
+  <div class="igmarquee" style="padding-bottom:88px;">
+    <div class="igmarquee-track">
+      <sc-for list="{{ feedItems }}" as="f" hint-placeholder-count="10">
+        <div class="igcard" onClick="{{ f.view }}">
+          <img src="{{ f.img }}" alt="{{ f.nameEn }}" style="object-position:{{ f.pos }};">
+          <span class="igcard-ig"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.1" fill="#fff"></circle></svg></span>
+          <span class="igcard-ov">
+            <span class="disp" style="color:#FFF9EE; font-size:16px; font-weight:700; line-height:1.25;"><span class="ar">{{ f.nameAr }}</span><span class="en">{{ f.nameEn }}</span></span>
+            <span style="color:#E9CE7A; font-size:13px; font-weight:700; margin-top:5px;"><span class="ar">{{ f.priceAr }} ج.م</span><span class="en">{{ f.priceEn }} EGP</span></span>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  </div>
+
+  </sc-if>
+
+  <!-- FOOTER -->
+  <footer id="footer" data-screen-label="Contact" style="background:#2B0D12; color:#D9C4BC;">
+    <div class="footgrid" style="max-width:1320px; margin:0 auto; padding:64px 26px 30px; display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px;">
+      <div>
+        <div style="display:flex; justify-content:flex-start;">
+          <img src="images/uno-logo-gold.png" alt="Uno Jewellery" style="height:76px; width:auto; display:block;">
+        </div>
+        <p style="font-size:13.5px; line-height:1.8; color:#a99d89; margin:18px 0 20px; max-width:280px; font-weight:300;"><span class="ar">مجوهرات مصرية مصنوعة يدوياً من الذهب والفضة، تُصاغ لتدوم.</span><span class="en">Egyptian handmade gold &amp; silver jewelry, crafted to last.</span></p>
+        <div style="display:flex; gap:12px;">
+          <a href="https://facebook.com" target="_blank" aria-label="Facebook" class="footsoc" style="width:38px;height:38px;border-radius:50%;border:1px solid rgba(212,166,87,.28);display:inline-flex;align-items:center;justify-content:center;color:#D9CFBE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M14 9h3V5h-3c-2.2 0-4 1.8-4 4v2H7v4h3v6h4v-6h3l1-4h-4V9c0-.6.4-1 1-1z"></path></svg></a>
+          <a href="https://instagram.com/UnoJewelleryEG" target="_blank" aria-label="Instagram" class="footsoc" style="width:38px;height:38px;border-radius:50%;border:1px solid rgba(212,166,87,.28);display:inline-flex;align-items:center;justify-content:center;color:#D9CFBE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="1.1" fill="currentColor"></circle></svg></a>
+          <a href="https://wa.me/201001234567" target="_blank" aria-label="WhatsApp" class="footsoc" style="width:38px;height:38px;border-radius:50%;border:1px solid rgba(212,166,87,.28);display:inline-flex;align-items:center;justify-content:center;color:#D9CFBE;"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.02 2c-5.52 0-10 4.48-10 10 0 1.76.46 3.48 1.34 5L2 22l5.14-1.34A9.94 9.94 0 0 0 12.02 22c5.52 0 10-4.48 10-10s-4.48-10-10-10zm5.86 14.13c-.25.7-1.46 1.34-2.01 1.38-.55.05-1.06.24-3.56-.74-3.01-1.19-4.9-4.28-5.05-4.48-.15-.2-1.2-1.59-1.2-3.04 0-1.44.76-2.15 1.03-2.44.27-.3.59-.37.79-.37.2 0 .39 0 .56.01.18.01.42-.07.66.5.25.6.84 2.06.91 2.21.07.15.12.33.02.53-.1.2-.15.32-.3.5-.15.17-.31.38-.45.51-.15.15-.3.31-.13.6.17.3.76 1.25 1.64 2.03 1.13 1 2.08 1.31 2.38 1.46.3.15.47.12.65-.07.17-.2.74-.87.94-1.16.2-.3.4-.25.66-.15.27.1 1.71.8 2 .95.3.15.5.22.57.35.07.12.07.72-.18 1.42z"></path></svg></a>
+          <a href="https://tiktok.com" target="_blank" aria-label="TikTok" class="footsoc" style="width:38px;height:38px;border-radius:50%;border:1px solid rgba(212,166,87,.28);display:inline-flex;align-items:center;justify-content:center;color:#D9CFBE;"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M16 3c.3 2.1 1.5 3.6 3.5 4v3c-1.3 0-2.5-.3-3.5-1v6.5c0 3-2.4 5.5-5.5 5.5S5 18.5 5 15.5 7.4 10 10.5 10c.3 0 .7 0 1 .1v3.1c-.3-.1-.6-.2-1-.2-1.4 0-2.5 1.1-2.5 2.5S9.1 18 10.5 18 13 16.9 13 15.5V3h3z"></path></svg></a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#FBF3E9; margin-bottom:16px; letter-spacing:.04em;"><span class="ar">روابط سريعة</span><span class="en">Quick Links</span></div>
+        <div style="display:flex; flex-direction:column; gap:11px; font-size:13.5px;">
+          <a href="#story" onClick="{{ goStory }}" class="footlink" style="color:#a99d89; text-decoration:none;"><span class="ar">من نحن</span><span class="en">About Us</span></a>
+          <a href="#grid" onClick="{{ goGrid }}" class="footlink" style="color:#a99d89; text-decoration:none;"><span class="ar">المتجر</span><span class="en">Shop</span></a>
+          <a href="#" class="footlink" style="color:#a99d89; text-decoration:none;"><span class="ar">السياسات والاستبدال</span><span class="en">Policies &amp; Returns</span></a>
+          <a href="#footer" onClick="{{ goFooter }}" class="footlink" style="color:#a99d89; text-decoration:none;"><span class="ar">تواصل معنا</span><span class="en">Contact</span></a>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#FBF3E9; margin-bottom:16px; letter-spacing:.04em;"><span class="ar">تواصل معنا</span><span class="en">Contact</span></div>
+        <div style="display:flex; flex-direction:column; gap:11px; font-size:13.5px; color:#a99d89;">
+          <div><span dir="ltr">010 0123 4567</span></div>
+          <div>hello@unojewellery.eg</div>
+          <div><span class="ar">شارع شامبليون، وسط البلد، القاهرة</span><span class="en">Champollion St., Downtown, Cairo</span></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:13px; font-weight:700; color:#FBF3E9; margin-bottom:16px; letter-spacing:.04em;"><span class="ar">مواعيد العمل</span><span class="en">Working Hours</span></div>
+        <div style="display:flex; flex-direction:column; gap:11px; font-size:13.5px; color:#a99d89;">
+          <div style="display:flex; justify-content:space-between; gap:14px;"><span class="ar">السبت – الخميس</span><span class="en">Sat – Thu</span><span dir="ltr">11:00 – 21:00</span></div>
+          <div style="display:flex; justify-content:space-between; gap:14px;"><span class="ar">الجمعة</span><span class="en">Friday</span><span dir="ltr">16:00 – 21:00</span></div>
+        </div>
+      </div>
+    </div>
+    <div style="border-top:1px solid rgba(212,166,87,.16);">
+      <div style="max-width:1320px; margin:0 auto; padding:20px 26px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; font-size:12.5px; color:#7d735f;">
+        <span class="ar">© ٢٠٢٦ اونو للمجوهرات. جميع الحقوق محفوظة.</span><span class="en">© 2026 Uno Jewellery. All rights reserved.</span>
+        <span><span class="ar">صُنع بحبٍّ في القاهرة</span><span class="en">Made with love in Cairo</span></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- mobile drawer scrim -->
+  <div class="drawer-scrim" onClick="{{ closeFilter }}"></div>
+
+</sc-if>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    lang: 'ar',
+    barOpen: true,
+    searchOpen: false,
+    filterOpen: false,
+    karat: 'all',
+    category: 'all',
+    maxPrice: 40000,
+    availability: 'all',
+    view: 'shop',
+    selectedId: 1,
+    activeImage: 0,
+    infoOpen: 'shipping',
+    wishlisted: false,
+    previewLoading: false,
+    showPassword: false,
+    notifyRequested: false,
+  };
+
+  toAr(n) {
+    return String(n).replace(/[0-9]/g, d => '٠١٢٣٤٥٦٧٨٩'[d]).replace(/,/g, '٬');
+  }
+  fmt(n) { return n.toLocaleString('en-US'); }
+
+  get allProducts() {
+    const base = [
+      { id:1, img:'images/snake.jpg', pos:'center 45%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:24500, avail:'in', badge:'new',
+        descAr:'أسورة انسيابية بتصميم الأفعى الكلاسيكي، مرصّعة يدوياً بأحجار الزركون البيضاء على تفاصيل ذهب عيار ١٨. تُفتح من الجانب لتناسب معصمك بإحكام.',
+        descEn:'A sculptural serpent bangle in 18K gold, hand-set with white zircon detailing along its coiled form. Side-hinge opening for a secure, comfortable fit.',
+        materialAr:'ذهب عيار ١٨ مطلي بالروديوم', materialEn:'18K gold, rhodium finish',
+        weightAr:'١٢ جم تقريباً', weightEn:'approx. 12g' },
+      { id:2, img:'images/rg-blossom.png', pos:'center 45%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:8900, avail:'in', badge:'',
+        descAr:'خاتم مربّع بنقشة زهرةٍ متفتّحة تشعّ من الوسط، بإطارٍ مموّجٍ محفورٍ يدوياً وتشطيبٍ وردي لامع.',
+        descEn:'A square ring with a radiant blossom motif flowing from its center, framed by a hand-carved scalloped edge in polished rose gold.',
+        materialAr:'ذهب وردي عيار ١٨', materialEn:'18K rose gold',
+        weightAr:'٨ جم تقريباً', weightEn:'approx. 8g' },
+      { id:15, img:'images/rg-signets.png', pos:'center 55%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:7800, avail:'in', badge:'new',
+        descAr:'تشكيلة خواتم الختم — دائري ومربّع وقلب — بأسطحٍ صقيلة أو منقوشة، تُلبس منفردةً أو متراكبة.',
+        descEn:'Our signet family — round, square, and heart faces in polished or textured finishes, to wear solo or stacked.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'٥ جم تقريباً', weightEn:'approx. 5g' },
+      { id:16, img:'images/rg-hearts.png', pos:'center', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:11400, avail:'in', badge:'',
+        descAr:'قلبٌ مموّجٌ كزهرةٍ متفتّحة يتوسّطه فصّ زمرد أو ألماس أو ياقوت — اختاري الحجر الذي يحكي قصّتك.',
+        descEn:'A fluted heart shaped like a flower in bloom, centered with an emerald, diamond, or ruby — choose the stone that tells your story.',
+        materialAr:'ذهب عيار ٢١ وأحجار كريمة', materialEn:'21K gold with gemstones',
+        weightAr:'٩ جم تقريباً', weightEn:'approx. 9g' },
+      { id:17, img:'images/rg-gemsignet.png', pos:'center', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:9200, avail:'in', badge:'',
+        descAr:'خواتم ختمٍ بأسطحٍ منقوشة بنسيجٍ هرمي، مرصّعةٌ بفصوص الياقوت والزمرد والسافير الملوّنة.',
+        descEn:'Signet rings with pyramid-textured faces, scattered with ruby, emerald, and sapphire accents.',
+        materialAr:'ذهب عيار ١٨ وأحجار ملوّنة', materialEn:'18K gold with colored stones',
+        weightAr:'٦ جم تقريباً', weightEn:'approx. 6g' },
+      { id:18, img:'images/rg-honeycomb.png', pos:'center 55%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:10600, avail:'in', badge:'best',
+        descAr:'حلقة عريضة بنقشة خلية النحل المصقولة، مريحةٌ للارتداء اليومي وتلمع من كل زاوية.',
+        descEn:'A wide band carved with a polished honeycomb motif — comfortable for daily wear and radiant from every angle.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'٧ جم تقريباً', weightEn:'approx. 7g' },
+      { id:19, img:'images/rg-texture.png', pos:'center', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:8400, avail:'in', badge:'',
+        descAr:'ثلاث نقشاتٍ للختم الكلاسيكي: نسيجٌ متشابك، وهرمياتٌ دقيقة، وضفيرةٌ محفورة — لمسة رجالية أنيقة أو إطلالة جريئة لها.',
+        descEn:'Three takes on the classic signet: basket weave, micro pyramids, and engraved braid — sharp for him, bold for her.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'٦ جم تقريباً', weightEn:'approx. 6g' },
+      { id:20, img:'images/rg-butterfly.png', pos:'center', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:13800, avail:'in', badge:'new',
+        descAr:'فراشةٌ ذهبيةٌ بأجنحةٍ مصقولةٍ تعانق الإصبع، يتوسّطها صفٌّ من الألماس المرصّع يدوياً.',
+        descEn:'A golden butterfly with mirror-polished wings hugging the finger, its body pavé-set with diamonds.',
+        materialAr:'ذهب عيار ٢١ وألماس', materialEn:'21K gold with diamonds',
+        weightAr:'١٠ جم تقريباً', weightEn:'approx. 10g' },
+      { id:21, img:'images/rg-ruby.png', pos:'center 50%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:17900, avail:'in', badge:'',
+        descAr:'خاتم التوأم: قبّتان ذهبيتان تلتقيان، إحداهما تحتضن ياقوتةً محاطةً بهالةٍ من الألماس.',
+        descEn:'A toi-et-moi of two golden domes — one crowned with an emerald-cut ruby in a diamond halo.',
+        materialAr:'ذهب عيار ١٨ وياقوت وألماس', materialEn:'18K gold with ruby & diamonds',
+        weightAr:'١١ جم تقريباً', weightEn:'approx. 11g' },
+      { id:22, img:'images/rg-bow.png', pos:'center 55%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:12300, avail:'in', badge:'',
+        descAr:'فيونكة ذهبية بطيّاتٍ مضلّعة تتوسّطها عقدةٌ مرصّعة بالألماس — أنوثةٌ جريئةٌ بلمسةٍ كلاسيكية.',
+        descEn:'A golden bow with fluted folds cinched by a diamond-set knot — bold femininity with a classic touch.',
+        materialAr:'ذهب عيار ٢١ وألماس', materialEn:'21K gold with diamonds',
+        weightAr:'٩ جم تقريباً', weightEn:'approx. 9g' },
+      { id:23, img:'images/rg-sunburst.png', pos:'center', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:15200, avail:'in', badge:'',
+        descAr:'وسادةٌ ذهبيةٌ بحفرٍ شعاعيٍّ يتدفّق نحو ألماسةٍ مركزية، بإطارٍ مضلّعٍ بتقنية الميلغرين الدقيقة.',
+        descEn:'A cushion of radiating engraving flowing toward a central diamond, edged with fine milgrain detailing.',
+        materialAr:'ذهب وردي عيار ١٨ وألماس', materialEn:'18K rose gold with diamond',
+        weightAr:'٩ جم تقريباً', weightEn:'approx. 9g' },
+      { id:24, img:'images/rg-duo.png', pos:'center 55%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:14700, avail:'order', badge:'',
+        descAr:'فيونكة شرائطية مرصّعة بالياقوت الوردي والزمرد، تُصاغ حسب الطلب لتُلبس مع خاتم الزهرة المرافق.',
+        descEn:'A ribboned bow set with pink sapphires and emeralds, made to order — pairs beautifully with its blossom companion.',
+        materialAr:'ذهب عيار ١٨ وأحجار ملوّنة', materialEn:'18K gold with colored stones',
+        weightAr:'١٠ جم تقريباً', weightEn:'approx. 10g' },
+      { id:3, img:'images/cuff.jpg', pos:'center 28%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:15750, comparePrice:18900, avail:'in', badge:'best',
+        descAr:'أسوارة كاف بملمس مطروق يدوياً، مستوحاة من الحرف المصرية القديمة، بتشطيب ذهبي دافئ يلائم كل المناسبات.',
+        descEn:'A hand-hammered cuff bangle inspired by ancient Egyptian metalwork, finished in a warm 21K gold tone suited to any occasion.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'١٨ جم تقريباً', weightEn:'approx. 18g' },
+      { id:4, img:'images/rg-cloud.png', pos:'center 55%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:12680, avail:'order', badge:'',
+        descAr:'خاتمٌ سحابيّ الشكل بطبقاتٍ متموّجة منقوشة بخطوطٍ دقيقة، مرصّعٌ بأحجارٍ ملوّنةٍ متناثرة. يُصنع حسب الطلب خلال ٧-١٠ أيام.',
+        descEn:'A cloud-form statement ring of layered scalloped waves, brush-engraved and scattered with colored gems. Made to order in 7–10 days.',
+        materialAr:'ذهب عيار ٢١ وأحجار ملوّنة', materialEn:'21K gold with colored stones',
+        weightAr:'١٢ جم تقريباً', weightEn:'approx. 12g' },
+      { id:5, img:'images/nk-serpent.png', pos:'center 45%', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:31200, avail:'in', badge:'best',
+        descAr:'أسورة الأفعى الملتفّة بحراشف شيفرون مصقولة، ورأسٍ مرصّعٍ بالزركون وعينين من الياقوت الوردي. قطعةٌ جريئة تلتفّ حول المعصم بانسيابية.',
+        descEn:'A coiled serpent piece with polished chevron scales and a pavé-set head finished with pink ruby eyes — a bold form that wraps the wrist fluidly.',
+        materialAr:'ذهب عيار ٢١ وياقوت وردي', materialEn:'21K gold with pink rubies',
+        weightAr:'٢٤ جم تقريباً', weightEn:'approx. 24g' },
+      { id:9, img:'images/nk-scarab.png', pos:'center 58%', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:16400, avail:'in', badge:'new',
+        descAr:'حلقات مضلّعة بأطرافٍ على شكل الجعران المصري، تُلبس منفردة أو متراكبة لإطلالةٍ فرعونية عصرية.',
+        descEn:'Ribbed coils capped with Egyptian scarab ends — wear one alone or stack them for a modern pharaonic look.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'١٤ جم تقريباً', weightEn:'approx. 14g' },
+      { id:10, img:'images/nk-fluted.png', pos:'center 72%', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:22800, avail:'in', badge:'',
+        descAr:'تصميم الأعمدة المضلّعة بخطوطٍ متوازية تعكس الضوء من كل زاوية، بإغلاقٍ مرنٍ يناسب مختلف المقاسات.',
+        descEn:'A fluted-column design with parallel ridges that catch light from every angle, with a flexible closure that fits most sizes.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'١٧ جم تقريباً', weightEn:'approx. 17g' },
+      { id:11, img:'images/nk-emerald.png', pos:'center 30%', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:27500, avail:'order', badge:'',
+        descAr:'طقمٌ متراكب من الذهب الوردي بقصّة شيفرون، مرصّعٌ بفصوص الزمرد الطبيعي وخصلةٍ منسوجةٍ يدوياً.',
+        descEn:'A rose-gold chevron stack set with natural emerald cabochons and a hand-woven braided band.',
+        materialAr:'ذهب وردي عيار ١٨ وزمرد طبيعي', materialEn:'18K rose gold with natural emeralds',
+        weightAr:'٢١ جم تقريباً', weightEn:'approx. 21g' },
+      { id:12, img:'images/nk-pyramid.png', pos:'center', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:19900, avail:'in', badge:'',
+        descAr:'نقشة الأهرام المصقولة على قاعدةٍ منسوجةٍ بإحكام — تفاصيل هندسية تُصاغ يدوياً حبةً حبة.',
+        descEn:'Polished pyramid studs on a tightly woven base — geometric detailing hand-set piece by piece.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'١٦ جم تقريباً', weightEn:'approx. 16g' },
+      { id:13, img:'images/nk-nile.png', pos:'center 55%', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:14200, avail:'in', badge:'new',
+        descAr:'سطحٌ مطروقٌ يدوياً يحاكي تموّجات النيل، بتشطيبٍ لامعٍ يمنح كل قطعةٍ بصمةً لا تتكرر.',
+        descEn:'A hand-hammered surface echoing the ripples of the Nile, polished so no two pieces are ever alike.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'١٣ جم تقريباً', weightEn:'approx. 13g' },
+      { id:14, img:'images/nk-web.png', pos:'center 55%', category:'عقود', catAr:'عقود', catEn:'Necklaces', karat:'24', karatAr:'عيار ٢٤', karatEn:'24K', price:35600, avail:'order', badge:'',
+        descAr:'قطعةٌ عريضة بنقشٍ شبكيٍّ مخرّم مستوحى من ضوء الشمس على الحجر، تُصنع حسب الطلب بدقةٍ متناهية.',
+        descEn:'A wide statement piece with an openwork lattice inspired by sunlight on stone — made to order with meticulous precision.',
+        materialAr:'ذهب عيار ٢٤', materialEn:'24K gold',
+        weightAr:'٢٨ جم تقريباً', weightEn:'approx. 28g' },
+      { id:6, img:'images/er-twist-hoop.jpg', pos:'center 32%', category:'حلق', catAr:'حلق', catEn:'Earrings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:7200, avail:'in', badge:'new',
+        descAr:'حلقٌ دائريٌّ كبيرٌ بانحناءاتٍ ملتويةٍ متموّجةٍ من الذهب المصقول، خفيف الوزن رغم حجمه اللافت — إطلالةٌ جريئةٌ تناسب النهار والمساء.',
+        descEn:'Large round hoops with a rippling, twisted contour in polished gold — striking in size yet light to wear, from day to night.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'٥ جم للزوج تقريباً', weightEn:'approx. 5g/pair' },
+      { id:7, img:'images/snake.jpg', pos:'center 55%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'silver', karatAr:'فضة', karatEn:'Silver', price:9750, avail:'in', badge:'',
+        descAr:'نسخة فضية من أسورة الأفعى الأيقونية، بتشطيبٍ مصقولٍ يمنحها بريقاً عصرياً بسعرٍ في متناول اليد.',
+        descEn:'The silver edition of our signature serpent bangle, polished for a modern shine at an accessible price point.',
+        materialAr:'فضة عيار ٩٢٥', materialEn:'Sterling silver 925',
+        weightAr:'١١ جم تقريباً', weightEn:'approx. 11g' },
+      { id:8, img:'images/rg-knot.png', pos:'center 45%', category:'خواتم', catAr:'خواتم', catEn:'Rings', karat:'24', karatAr:'عيار ٢٤', karatEn:'24K', price:19300, avail:'out', badge:'out',
+        descAr:'حلقاتٌ دائريةٌ متداخلة تعلوها عقدةٌ منقوشة بحجر زمرد — القطعة الأكثر طلباً، ونفدت الكمية حالياً.',
+        descEn:'Interlocking circles crowned by an engraved knot set with an emerald — our most requested piece, currently out of stock.',
+        materialAr:'ذهب عيار ٢٤ وحجر زمرد', materialEn:'24K gold with emerald stone',
+        weightAr:'٧ جم تقريباً', weightEn:'approx. 7g' },
+      { id:25, img:'images/br-gemstone-chevron.jpg', pos:'center 60%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:21500, avail:'in', badge:'new',
+        descAr:'أسورة بحلقاتٍ على شكل الشيفرون المتعرّج، مرصّعةٌ يدوياً بأحجارٍ ملوّنةٍ من الياقوت والزمرد والسافير والزركون الأبيض على ذهبٍ عيار ٢١. تُكمّل العقد المطابق لإطلالةٍ متكاملة.',
+        descEn:'A bracelet of zigzag chevron links hand-set with a rainbow of ruby, emerald, sapphire, and white zircon on 21K gold. Pairs with its matching necklace for a complete set.',
+        materialAr:'ذهب عيار ٢١ وأحجار ملوّنة', materialEn:'21K gold with colored stones',
+        weightAr:'١٤ جم تقريباً', weightEn:'approx. 14g' },
+      { id:26, img:'images/br-rose-links.jpg', pos:'center 55%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:18900, avail:'in', badge:'best',
+        descAr:'أسورة بحلقاتٍ بيضاويةٍ متشابكةٍ عريضةٍ بتشطيبٍ ذهبيٍّ ورديٍّ لامع وإغلاقٍ محكم — قطعةٌ عصريةٌ جريئةٌ تُلبس منفردةً أو مع العقد المطابق.',
+        descEn:'Chunky interlocking oval links in a polished rose-gold finish with a secure clasp — a bold modern piece to wear alone or with its matching necklace.',
+        materialAr:'ذهب وردي عيار ١٨', materialEn:'18K rose gold',
+        weightAr:'١٦ جم تقريباً', weightEn:'approx. 16g' },
+      { id:27, img:'images/br-gold-links.jpg', pos:'center 58%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:19700, avail:'in', badge:'',
+        descAr:'أسورة سلسلةٍ بحلقاتٍ بيضاويةٍ مصقولةٍ من الذهب عيار ٢١، بوزنٍ متوازنٍ وملمسٍ ناعمٍ على المعصم — أناقةٌ يوميةٌ لا تُخطئها العين.',
+        descEn:'A polished oval-link 21K gold chain bracelet, balanced in weight and smooth on the wrist — effortless everyday elegance.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'١٥ جم تقريباً', weightEn:'approx. 15g' },
+      { id:28, img:'images/br-beaded.jpg', pos:'center 68%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:9800, avail:'in', badge:'new',
+        descAr:'أسورةٌ رفيعةٌ تتناثر عليها عناقيدُ من الكرات الذهبية الصغيرة على سلسلةٍ دقيقة، خفيفةٌ ومريحةٌ للارتداء اليومي ومثاليةٌ للتركيب مع أساورَ أخرى.',
+        descEn:'A fine chain scattered with clusters of tiny gold beads — light, comfortable for daily wear, and perfect for stacking.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'٨ جم تقريباً', weightEn:'approx. 8g' },
+      { id:29, img:'images/br-fan.jpg', pos:'center 60%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:16400, avail:'in', badge:'',
+        descAr:'أسورةٌ مسطّحةٌ من ألسنةٍ ذهبيةٍ مضلّعةٍ متجاورةٍ تعكس الضوء كالمروحة، بتصميمٍ انسيابيٍّ يلتفّ حول المعصم بأناقة. تُكمّل عقد الأشعة المطابق.',
+        descEn:'A flat bracelet of side-by-side ribbed gold bars that fan the light, curving fluidly around the wrist. Completes the matching fan necklace.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'١٣ جم تقريباً', weightEn:'approx. 13g' },
+      { id:30, img:'images/br-fluted.jpg', pos:'center 68%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:17600, avail:'in', badge:'',
+        descAr:'أسورة بحلقاتٍ بيضاويةٍ منقوشةٍ بخطوطٍ مضلّعةٍ دقيقةٍ تتلألأ من كل زاوية، بتصميمٍ كلاسيكيٍّ بلمسةٍ عصرية. تُلبس مع العقد المطابق لإطلالةٍ فاخرة.',
+        descEn:'Oval links carved with fine fluted ridges that catch light from every angle — classic form with a modern edge. Wears beautifully with its matching necklace.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'١٥ جم تقريباً', weightEn:'approx. 15g' },
+      { id:31, img:'images/br-diamond-band.jpg', pos:'center 55%', category:'أساور', catAr:'أساور', catEn:'Bracelet', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:26800, comparePrice:31000, avail:'in', badge:'best',
+        descAr:'أسورةٌ نصف صلبةٍ بأجزاءٍ ذهبيةٍ ورديةٍ متتالية، مرصّعةٌ بعناقيدَ من الألماس بنقشٍ شعاعيٍّ متلألئ، بإغلاقٍ مرنٍ يحتضن المعصم. تُكمّل العقد المطابق.',
+        descEn:'A semi-rigid bangle of segmented rose-gold panels set with sunburst clusters of diamonds, with a flexible hinge that hugs the wrist. Completes the matching necklace.',
+        materialAr:'ذهب وردي عيار ١٨ وألماس', materialEn:'18K rose gold with diamonds',
+        weightAr:'١٧ جم تقريباً', weightEn:'approx. 17g' },
+      { id:32, img:'images/er-hoop-lg.jpg', pos:'center 40%', category:'حلق', catAr:'حلق', catEn:'Earrings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:8400, avail:'in', badge:'best',
+        descAr:'حلقٌ دائريٌّ كبيرٌ بأنبوبٍ ذهبيٍّ أملسَ لامع، تصميمٌ كلاسيكيٌّ خالدٌ يمنح الإطلالة جرأةً وأناقة، مجوّفٌ ليبقى خفيفاً على الأذن.',
+        descEn:'Oversized round hoops in smooth, glossy gold tubing — a timeless classic that adds bold polish to any look, hollow-formed to stay light on the ear.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'٦ جم للزوج تقريباً', weightEn:'approx. 6g/pair' },
+      { id:33, img:'images/er-hoop.jpg', pos:'center 40%', category:'حلق', catAr:'حلق', catEn:'Earrings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:5900, avail:'in', badge:'',
+        descAr:'حلقٌ دائريٌّ متوسط الحجم بأنبوبٍ ذهبيٍّ سميكٍ مصقول، القطعة الأساسية في كل صندوق مجوهرات، مريحٌ للارتداء طوال اليوم.',
+        descEn:'Medium round hoops in thick polished gold tubing — the everyday essential in any jewelry box, comfortable enough for all-day wear.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'٤ جم للزوج تقريباً', weightEn:'approx. 4g/pair' },
+      { id:34, img:'images/er-square-rope.jpg', pos:'center 40%', category:'حلق', catAr:'حلق', catEn:'Earrings', karat:'18', karatAr:'عيار ١٨', karatEn:'18K', price:6800, avail:'in', badge:'new',
+        descAr:'حلقٌ مربّع الشكل بملمسٍ مجدولٍ يحاكي الحبل، يجمع بين الجرأة الهندسية والتفاصيل الحرفية الدقيقة — لمسةٌ عصريةٌ مميّزة.',
+        descEn:'Square-form hoops with a braided rope texture, blending geometric boldness with fine artisanal detail — a distinctive modern touch.',
+        materialAr:'ذهب عيار ١٨', materialEn:'18K gold',
+        weightAr:'٥ جم للزوج تقريباً', weightEn:'approx. 5g/pair' },
+      { id:35, img:'images/er-infinity.jpg', pos:'center 45%', category:'حلق', catAr:'حلق', catEn:'Earrings', karat:'21', karatAr:'عيار ٢١', karatEn:'21K', price:9300, avail:'order', badge:'',
+        descAr:'حلقٌ متدلٍّ على شكل اللانهاية بملمسٍ مجدولٍ دقيق، ينساب برشاقةٍ مع حركة الرأس — تصميمٌ رمزيٌّ أنيقٌ يُصنع حسب الطلب.',
+        descEn:'Figure-eight infinity drops with a finely braided texture that sways gracefully with movement — an elegant symbolic design, made to order.',
+        materialAr:'ذهب عيار ٢١', materialEn:'21K gold',
+        weightAr:'٥ جم للزوج تقريباً', weightEn:'approx. 5g/pair' },
+    ];
+    const badgeMap = {
+      new: { ar:'وصل حديثاً', en:'New', bg:'#8B4513', fg:'#FBF3E9' },
+      best: { ar:'الأكثر مبيعاً', en:'Bestseller', bg:'#AD8032', fg:'#FFF9EE' },
+      out: { ar:'غير متوفر', en:'Out of Stock', bg:'#2A2320', fg:'#F5EAD6' },
+      '': { ar:'', en:'', bg:'', fg:'' },
+    };
+    return base.map(p => {
+      const b = badgeMap[p.badge] || badgeMap[''];
+      const discountPct = p.comparePrice ? Math.round((1 - p.price / p.comparePrice) * 100) : 0;
+      return {
+        ...p,
+        nameAr: this.names[p.id].ar, nameEn: this.names[p.id].en, alt: this.names[p.id].en,
+        priceAr: this.toAr(this.fmt(p.price)), priceEn: this.fmt(p.price),
+        comparePriceAr: p.comparePrice ? this.toAr(this.fmt(p.comparePrice)) : '',
+        comparePriceEn: p.comparePrice ? this.fmt(p.comparePrice) : '',
+        hasCompare: !!p.comparePrice,
+        discountAr: p.comparePrice ? this.toAr(discountPct) : '',
+        discountEn: discountPct,
+        wa: 'https://wa.me/201001234567?text=' + encodeURIComponent('مرحباً، أرغب في طلب: ' + this.names[p.id].ar),
+        avlOrder: p.avail === 'order',
+        isOut: p.avail === 'out',
+        notOut: p.avail !== 'out',
+        inStock: p.avail === 'in',
+        badgeAr: b.ar, badgeEn: b.en, badgeBg: b.bg, badgeFg: b.fg,
+      };
+    });
+  }
+
+  names = {
+    1:{ar:'أسورة الأفعى الماسية', en:'Diamond Serpent Bangle'},
+    2:{ar:'خاتم الزهرة الملكي', en:'Royal Blossom Ring'},
+    15:{ar:'تشكيلة خواتم الختم', en:'Signet Collection'},
+    16:{ar:'خاتم القلب المتفتّح', en:'Blooming Heart Ring'},
+    17:{ar:'خاتم الختم المرصّع', en:'Gem-Set Signet'},
+    18:{ar:'خاتم خلية الذهب', en:'Honeycomb Band'},
+    19:{ar:'ثلاثية الختم المنقوش', en:'Textured Signet Trio'},
+    20:{ar:'خاتم الفراشة الذهبية', en:'Golden Butterfly Ring'},
+    21:{ar:'خاتم الياقوت التوأم', en:'Ruby Toi et Moi'},
+    22:{ar:'خاتم الفيونكة', en:'Golden Bow Ring'},
+    23:{ar:'خاتم شعاع الألماس', en:'Sunburst Diamond Ring'},
+    24:{ar:'فيونكة الأحجار الملوّنة', en:'Jeweled Bow Ring'},
+    3:{ar:'أسورة الكاف المزخرفة', en:'Textured Gold Cuff'},
+    4:{ar:'خاتم السحابة المرصّع', en:'Cloud Statement Ring'},
+    5:{ar:'طوق الأفعى الياقوتي', en:'Serpent Ruby Coil'},
+    9:{ar:'حلقات الجعران الملكية', en:'Royal Scarab Coils'},
+    10:{ar:'طوق الأعمدة المضلّعة', en:'Fluted Column Band'},
+    11:{ar:'طقم الزمرد الوردي', en:'Emerald Chevron Set'},
+    12:{ar:'طوق الأهرام المنسوج', en:'Pyramid Weave Band'},
+    13:{ar:'طوق النيل المطروق', en:'Hammered Nile Band'},
+    14:{ar:'طوق الشبكة الذهبية', en:'Golden Lattice Cuff'},
+    6:{ar:'حلق الحلقات الملتوية', en:'Twisted Wave Hoops'},
+    7:{ar:'أسورة الأفعى الفضية', en:'Silver Serpent Bangle'},
+    8:{ar:'خاتم الزمرد المتشابك', en:'Emerald Knot Ring'},
+    25:{ar:'أسورة الشيفرون الملوّنة', en:'Jeweled Chevron Bracelet'},
+    26:{ar:'أسورة السلسلة الوردية', en:'Bold Rose-Link Bracelet'},
+    27:{ar:'أسورة الحلقات الذهبية', en:'Gold Rolo Bracelet'},
+    28:{ar:'أسورة العناقيد الذهبية', en:'Beaded Cluster Bracelet'},
+    29:{ar:'أسورة الأشعة المضلّعة', en:'Ribbed Fan Bracelet'},
+    30:{ar:'أسورة الحلقات المموّجة', en:'Fluted Oval-Link Bracelet'},
+    31:{ar:'أسورة الشعاع الماسية', en:'Diamond Sunburst Bangle'},
+    32:{ar:'حلق الحلقات الكبيرة', en:'Grand Round Hoops'},
+    33:{ar:'حلق الحلقات الكلاسيكية', en:'Classic Gold Hoops'},
+    34:{ar:'حلق المربّع المجدول', en:'Rope Square Hoops'},
+    35:{ar:'حلق اللانهاية المجدول', en:'Infinity Twist Drops'},
+  };
+
+  galleryFor(p) {
+    return [
+      { real: true, img: p.img, pos: p.pos },
+      { real: false, capAr: 'تفاصيل مقرّبة', capEn: 'Detail shot' },
+      { real: false, capAr: 'على الموديل', capEn: 'On model' },
+    ];
+  }
+
+  specsFor(p) {
+    return [
+      { labelAr:'المادة', labelEn:'Material', valAr:p.materialAr, valEn:p.materialEn },
+      { labelAr:'الوزن', labelEn:'Weight', valAr:p.weightAr, valEn:p.weightEn },
+      { labelAr:'العيار', labelEn:'Purity', valAr:p.karatAr, valEn:p.karatEn },
+      { labelAr:'المنشأ', labelEn:'Origin', valAr:'صناعة يدوية، القاهرة', valEn:'Handmade, Cairo' },
+    ];
+  }
+
+  // random selection for the Instagram sliding gallery, picked once per session
+  get feedProducts() {
+    const all = this.allProducts;
+    if (!this._feedIds) {
+      this._feedIds = [...all].sort(() => Math.random() - 0.5).slice(0, 9).map(p => p.id);
+    }
+    const byId = {};
+    all.forEach(p => { byId[p.id] = p; });
+    return this._feedIds.map(id => byId[id]).filter(Boolean);
+  }
+
+  setCategory(c) {
+    this.setState(s => ({ category: s.category === c ? 'all' : c, filterOpen: false, view: 'shop' }));
+    setTimeout(() => {
+      const el = document.getElementById('grid');
+      if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' });
+    }, 60);
+  }
+
+  renderVals() {
+    const { lang, karat, category, maxPrice, availability, view } = this.state;
+    const all = this.allProducts;
+    const filtered = all.filter(p =>
+      (karat === 'all' || p.karat === karat) &&
+      (category === 'all' || p.category === category) &&
+      (p.price <= maxPrice) &&
+      (availability === 'all' || p.avail === availability)
+    );
+    const countBy = (fn) => all.filter(fn).length;
+
+    const karatDefs = [
+      { val:'all', ar:'الكل', en:'All' },
+      { val:'24', ar:'عيار ٢٤', en:'24K' },
+      { val:'21', ar:'عيار ٢١', en:'21K' },
+      { val:'18', ar:'عيار ١٨', en:'18K' },
+      { val:'silver', ar:'فضة', en:'Silver' },
+    ];
+    const catDefs = [
+      { val:'all', ar:'كل الأصناف', en:'All Categories', c:all.length },
+      { val:'عقود', ar:'عقود', en:'Necklaces', c:countBy(p=>p.category==='عقود') },
+      { val:'خواتم', ar:'خواتم', en:'Rings', c:countBy(p=>p.category==='خواتم') },
+      { val:'أساور', ar:'أساور', en:'Bracelets', c:countBy(p=>p.category==='أساور') },
+      { val:'حلق', ar:'حلق', en:'Earrings', c:countBy(p=>p.category==='حلق') },
+    ];
+    const availDefs = [
+      { val:'all', ar:'الكل', en:'All' },
+      { val:'in', ar:'متوفر الآن', en:'In stock' },
+      { val:'order', ar:'حسب الطلب', en:'Made to order' },
+    ];
+
+    const fillPct = Math.round(((maxPrice - 3000) / (40000 - 3000)) * 100) + '%';
+
+    const viewProduct = (id) => () => {
+      this.setState({ view:'product', selectedId:id, activeImage:0, wishlisted:false, notifyRequested:false, infoOpen:'shipping' });
+      window.scrollTo({ top:0, behavior:'smooth' });
+    };
+    const stopProp = (e) => e.stopPropagation();
+    const backToShop = () => { this.setState({ view:'shop' }); window.scrollTo({ top:0, behavior:'smooth' }); };
+    const goLogin = () => { this.setState({ view:'login' }); window.scrollTo({ top:0, behavior:'smooth' }); };
+    const goHome = (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      this.setState({ view:'shop' });
+      setTimeout(() => window.scrollTo({ top:0, behavior:'smooth' }), 30);
+    };
+    const goSection = (id) => (e) => {
+      if (e && e.preventDefault) e.preventDefault();
+      this.setState({ view:'shop' });
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior:'smooth' });
+      }, 60);
+    };
+    const loginSubmit = (e) => { e.preventDefault(); this.setState({ view:'shop' }); window.scrollTo({ top:0, behavior:'smooth' }); };
+
+    const selected = all.find(p => p.id === this.state.selectedId) || all[0];
+    const gallery = this.galleryFor(selected).map((g, i) => ({
+      ...g,
+      notReal: !g.real,
+      isActive: i === this.state.activeImage ? 'true' : 'false',
+      on: () => this.setState({ activeImage: i }),
+    }));
+    const activeGalleryItem = gallery[this.state.activeImage] || gallery[0];
+    const specs = this.specsFor(selected);
+    const related = all
+      .filter(p => p.id !== selected.id)
+      .sort((a, b) => (a.category === selected.category ? -1 : 1) - (b.category === selected.category ? -1 : 1))
+      .slice(0, 4)
+      .map(p => ({ ...p, view: viewProduct(p.id) }));
+
+    const feedBase = this.feedProducts.map(p => ({
+      img: p.img, pos: p.pos, nameAr: p.nameAr, nameEn: p.nameEn,
+      priceAr: p.priceAr, priceEn: p.priceEn, view: viewProduct(p.id),
+    }));
+
+    return {
+      lang,
+      barOpen: this.state.barOpen,
+      searchOpen: this.state.searchOpen,
+      filterOpenAttr: this.state.filterOpen ? '1' : '0',
+
+      isLogin: view === 'login',
+      isProduct: view === 'product',
+      isShop: view === 'shop',
+      showSite: view !== 'login',
+
+      products: filtered.map(p => ({ ...p, view: viewProduct(p.id), isOutAttr: p.isOut ? 'true' : 'false', waClick: stopProp })),
+      resultCount: filtered.length,
+      countAr: this.toAr(filtered.length),
+      hasResults: filtered.length > 0,
+      noResults: filtered.length === 0,
+      maxPrice,
+      maxPriceAr: this.toAr(this.fmt(maxPrice)),
+      maxPriceEn: this.fmt(maxPrice),
+      fillPct,
+      searchPlaceholder: lang === 'ar' ? 'ابحثي عن قطعة...' : 'Search for a piece...',
+      emailPh: lang === 'ar' ? 'أدخلي بريدكِ الإلكتروني' : 'Enter your email',
+      pwPh: lang === 'ar' ? 'أدخلي كلمة المرور' : 'Enter your password',
+      arActiveStyle: lang === 'ar' ? 'color:#C1912F;font-weight:800;' : 'color:#9a8f7d;',
+      enActiveStyle: lang === 'en' ? 'color:#C1912F;font-weight:800;' : 'color:#9a8f7d;',
+
+      karatOpts: karatDefs.map(k => ({ ...k, active: karat === k.val ? 'true' : 'false', on: () => this.setState({ karat: k.val }) })),
+      catOpts: catDefs.map(c => ({ ...c, count: this.toAr(c.c), active: category === c.val ? 'true' : 'false', on: () => this.setState({ category: c.val, filterOpen:false }) })),
+      availOpts: availDefs.map(a => ({ ...a, active: availability === a.val ? 'true' : 'false', on: () => this.setState({ availability: a.val }) })),
+
+      toggleLang: () => this.setState(s => ({ lang: s.lang === 'ar' ? 'en' : 'ar' })),
+      dismissBar: () => this.setState({ barOpen: false }),
+      toggleSearch: () => this.setState(s => ({ searchOpen: !s.searchOpen })),
+      openFilter: () => this.setState({ filterOpen: true }),
+      closeFilter: () => this.setState({ filterOpen: false }),
+      clearFilters: () => this.setState({ karat:'all', category:'all', maxPrice:40000, availability:'all' }),
+      setMaxPrice: (e) => this.setState({ maxPrice: +e.target.value }),
+      filterNecklaces: () => this.setCategory('عقود'),
+      filterRings: () => this.setCategory('خواتم'),
+      filterBracelets: () => this.setCategory('أساور'),
+      filterEarrings: () => this.setCategory('حلق'),
+
+      goHome, backToShop, goLogin, loginSubmit,
+      goGrid: goSection('grid'), goStory: goSection('story'), goFooter: goSection('footer'),
+      pwType: this.state.showPassword ? 'text' : 'password',
+      togglePwd: () => this.setState(s => ({ showPassword: !s.showPassword })),
+
+      selected, gallery, activeGalleryItem, specs, related,
+
+      toggleWishlist: () => this.setState(s => ({ wishlisted: !s.wishlisted })),
+      heartFill: this.state.wishlisted ? '#8B4513' : 'none',
+      notifyRequested: this.state.notifyRequested,
+      notifyNotRequested: !this.state.notifyRequested,
+      notifyMe: () => this.setState({ notifyRequested: true }),
+
+      shipMax: this.state.infoOpen === 'shipping' ? '400px' : '0px',
+      careMax: this.state.infoOpen === 'care' ? '400px' : '0px',
+      shipChevRot: this.state.infoOpen === 'shipping' ? 'rotate(180deg)' : 'rotate(0deg)',
+      careChevRot: this.state.infoOpen === 'care' ? 'rotate(180deg)' : 'rotate(0deg)',
+      toggleShip: () => this.setState(s => ({ infoOpen: s.infoOpen === 'shipping' ? null : 'shipping' })),
+      toggleCare: () => this.setState(s => ({ infoOpen: s.infoOpen === 'care' ? null : 'care' })),
+
+      previewLoading: this.state.previewLoading,
+      notPreviewLoading: !this.state.previewLoading,
+      toggleLoadingPreview: () => this.setState(s => ({ previewLoading: !s.previewLoading })),
+      skeletonItems: [1,2,3,4,5,6,7,8],
+
+      feedItems: feedBase.concat(feedBase, feedBase, feedBase),
+    };
+  }
+}
+
+</script>
+</body>
+</html>
